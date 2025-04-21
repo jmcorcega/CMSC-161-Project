@@ -13,6 +13,7 @@ if (typeof window !== 'undefined' && typeof window.localStorage === 'undefined')
 
 // Load the WebStorage API early
 const storage = window.localStorage;
+const json = JSON;
 
 // Function to Base64 encode a string
 function base64Encode(str) {
