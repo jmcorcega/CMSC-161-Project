@@ -58,6 +58,8 @@ function __on_key_event(event) {
     }
 }
 
-document.addEventListener('keydown', __on_key_event);
-document.addEventListener('keyup', __on_key_event);
-document.addEventListener('keypress', __on_key_event);
+// Add event listeners for keydown, keyup events after the DOM is fully loaded
+document.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('keydown', __on_key_event);
+    window.addEventListener('keyup', __on_key_event);
+});
