@@ -4,9 +4,31 @@
         <title>CMSC 161 Project</title>
 
         <!-- Insert CSS here! -->
+        <link rel="stylesheet" href="css/animate.min.css">
         <link rel="stylesheet" href="css/fonts.css">
+        <link rel="stylesheet" href="css/main.css">
+
+        <link rel="stylesheet" href="css/loading-screen.css">
+        <link rel="stylesheet" href="css/title-screen.css">
     </head>
     <body>
+        <div id="game">
+            <!-- This will be replaced programmatically by page templates -->
+            <div id="page-container"></div>
+            <div id="loading-screen" class="loading-screen animate__animated dialog-gone">
+                <div id="loading-screen-container">
+                    <div class="loading-game-logo">
+                        <span class="title-game-name">Snek 3D</span>
+                    </div>
+                    <div class="loading-progress-container">
+                        <p class="loading-text">Loading...</p>
+                        <div class="progress">
+                            <div id="loading-progress" class="bar shadow wiggle"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Put shaders here! -->
         <script id="vertex-shader" type="x-shader/x-vertex" src="shaders/vertex-shader.glsl"></script>
@@ -19,6 +41,8 @@
         <script src="lib/gl-matrix-min.js"></script>
 
         <!-- Put scripts here! -->
+        <script src="code/progress_screen.js"></script>
+        <script src="code/page_helper.js"></script>
         <script src="code/key_listener.js"></script>
         <script src="code/storage.js"></script>
         <script src="code/main.js"></script>

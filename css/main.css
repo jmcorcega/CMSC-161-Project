@@ -1,0 +1,358 @@
+
+body {
+    width: 100vw;
+    height: 100vh;
+    background-color: #121212;
+    cursor: url('../img/cursor/normal.png'), auto;	
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+::-webkit-scrollbar {
+    display: none;
+}
+
+body {
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */
+}
+
+img {
+    pointer-events: none;
+}
+
+/* Buttons */
+button {
+    background-color: rgba(0, 0, 0, 0.0);
+    background: url('data:image/png;base64,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');
+    background-size: contain;
+    background-repeat: repeat-x;
+    margin: 4px;
+    border-radius: 5px;
+    padding: 10px 10px 10px 10px;
+    transition: top 300ms ease-in-out;
+    box-sizing: border-box;
+    height: 8vh;
+    width: 7vw;
+    font-family: "Kenney Mini";
+    font-size: 1.25rem;
+    cursor: url('../img/cursor/normal.png'), auto !important;	
+}
+
+button:active {
+    box-shadow: none !important;
+    position: relative !important;
+    top: .2em !important;
+}
+/* Buttons */
+
+/* Dialogs */
+.dialog-gone {
+    display: none !important;
+    opacity: 0 !important;
+}
+
+.dialog-bg {
+    background-color: rgba(0, 0, 0, 0.45);
+}
+
+.dialog-container {
+    z-index: 10;
+    transition: all 200ms;
+}
+
+.dialog {
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: auto;
+    background-color: #fff;
+    border: 3px ridge #d5d5d5;
+    padding: 5vh 4vw;
+    width: 35vw;
+    height: 50vh;
+    transition: all 200ms;
+}
+
+#dialog-bg-first-play {
+    z-index: 4;
+}
+
+.dialog-first-play {
+    width: 37.5rem;
+    height: 37.5rem;
+}
+
+.dialog-first-play-title h1 {
+    color: #f2f2f2;
+    margin-top: 10vh;
+    margin-bottom: 8vh;
+    font-size: 1.75rem;
+    font-family: 'Kenney Mini Square';
+    text-align: center;
+}
+
+.dialog-first-play-features {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.dialog-first-play-feature {
+    display: flex;
+    margin: auto;
+    padding-top: 2vh;
+    padding-bottom: 2vh;
+}
+
+.dialog-first-play-feature p {
+    color: #f2f2f2;
+    font-family: 'Kenney Mini';
+    font-size: 1.25rem;
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+.dialog-first-play-feature img {
+    height: 6vw;
+}
+
+.dialog-first-play-bottom-text {
+    color: #fafafa;
+    padding-top: 17vh;
+    font-family: 'Kenney Mini';
+    margin: auto;
+}
+
+#dialog-pause {
+    width: 30vw;
+    height: 70vh;
+}
+
+#dialog-end-game {
+    width: 30vw;
+    height: 70vh;
+}
+
+#dialog-save-data {
+    width: 35vw;
+    height: 80vh;
+}
+
+.dialog-title, .dialog-content, dialog-buttons {
+    display: block;
+    margin: auto;
+    align-items: center;
+    position: relative;
+    width: 100%;
+    padding-bottom: 3vh;
+}
+
+.dialog-title img {
+    margin: auto;
+    padding-top: 2vh;
+    padding-bottom: 3vh;
+    height: 10vw;
+    display: block;
+}
+
+.dialog-title h1, .dialog-content-text, .dialog-content-subtitle {
+    font-family: 'Kenney Mini';
+    text-align: center;
+    margin: auto;
+    width: 100%;
+}
+
+#dialog-content-text {
+    color: #151515;
+}
+
+#dialog-content-subtitle {
+    color: #858585;
+}
+
+.dialog-title h1 {
+    color: #6f6f6f;
+}
+
+.dialog-buttons-container {
+    display: flex;
+    margin: auto;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.dialog-pause-buttons-container {
+    display: table-row;
+    margin: auto;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.dialog-title h1 {
+    font-size: 2.25rem;
+}
+
+.dialog-content-text {
+    font-size: 1.5rem;
+}
+
+.dialog-save-data-text {
+    font-size: 1.25rem;
+}
+
+.dialog-content-subtitle {
+    font-size: 0.8rem;
+    color: #858585;
+}
+
+#dialog-btn-positive {
+    color: #44842c;
+    background-color: #73cd4b !important;
+    border: 3px solid #5fb13a;
+    box-shadow: 0 .2em #47832c;
+}
+#dialog-btn-negative {
+    color: #cc5c14;
+    background-color: #ee7120 !important;
+    border: 3px solid #cd5d12;
+    box-shadow: 0 .2em #aa4e11;
+}
+#dialog-btn-neutral {
+    color: #166e93;
+    background-color: #1ea7e1 !important;
+    border: 3px solid #1989b8;
+    box-shadow: 0 .2em #166e93;
+}
+
+#dialog-btn-upload {
+    width: 10vw;
+    margin-left: 1vw;
+    margin-right: 1vw;
+    margin-bottom: 4vh;
+    color: #cc5c14;
+    background-color: #ee7120 !important;
+    border: 3px solid #cd5d12;
+    box-shadow: 0 .2em #aa4e11;
+}
+#dialog-btn-download {
+    width: 10vw;
+    margin-left: 1vw;
+    margin-right: 1vw;
+    margin-bottom: 4vh;
+    color: #44842c;
+    background-color: #73cd4b !important;
+    border: 3px solid #5fb13a;
+    box-shadow: 0 .2em #47832c;
+}
+#dialog-btn-save-close {
+    color: #166e93;
+    width: 4vw;
+    height: 4vw;
+    background-color: #1ea7e1 !important;
+    border: 3px solid #1989b8;
+    box-shadow: 0 .2em #166e93;
+}
+#dialog-btn-save-close img {
+    filter: invert(33%) sepia(39%) saturate(1036%) hue-rotate(153deg) brightness(99%) contrast(89%);
+}
+
+
+#dialog-btn-resume {
+    display: block;
+    width: 12vw;
+    margin-bottom: 1vh;
+    color: #44842c;
+    background-color: #73cd4b !important;
+    border: 3px solid #5fb13a;
+    box-shadow: 0 .2em #47832c;
+}
+#dialog-btn-exit {
+    display: block;
+    width: 12vw;
+    margin-bottom: 1vh;
+    color: #cc5c14;
+    background-color: #ee7120 !important;
+    border: 3px solid #cd5d12;
+    box-shadow: 0 .2em #aa4e11;
+}
+#dialog-btn-restart {
+    display: block;
+    width: 12vw;
+    margin-bottom: 1vh;
+    color: #166e93;
+    background-color: #1ea7e1 !important;
+    border: 3px solid #1989b8;
+    box-shadow: 0 .2em #166e93;
+}
+#dialog-end-btn-exit {
+    display: block;
+    width: 12vw;
+    margin-bottom: 1vh;
+    color: #cc5c14;
+    background-color: #ee7120 !important;
+    border: 3px solid #cd5d12;
+    box-shadow: 0 .2em #aa4e11;
+}
+#dialog-end-btn-restart {
+    display: block;
+    width: 12vw;
+    margin-bottom: 1vh;
+    color: #166e93;
+    background-color: #1ea7e1 !important;
+    border: 3px solid #1989b8;
+    box-shadow: 0 .2em #166e93;
+}
+
+.dialog-option-buttons {
+    display: flex;
+    align-items: center;
+    margin-top: 2vh;
+}
+#dialog-btn-music, #dialog-btn-sound {
+    display: inline-block;
+    margin: auto;
+    font-size: 1.25rem;
+    width: 4vw;
+    height: 4vw;
+    padding: 0.25vw;
+    
+    color: #ac8404;
+    background-color: #ffcc00 !important;
+    border: 3px solid #cda400;
+    box-shadow: 0 .2em #a88600;
+}
+
+#dialog-btn-music img, #dialog-btn-sound img {
+    filter: invert(51%) sepia(53%) saturate(3081%) hue-rotate(24deg) brightness(92%) contrast(97%);
+}
+/* Dialogs */
+
+#game {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+}
+
+.loading-screen, #page-container {
+    display: flex;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}

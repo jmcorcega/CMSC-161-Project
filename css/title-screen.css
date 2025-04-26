@@ -1,0 +1,23 @@
+
+.title-buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2em;
+}
+
+.title-game-name {
+    font-size: 3rem;
+    font-family: 'Kenney Rocket';
+    color: #1ea7e1;
+    text-shadow: 0 0 1px #166e93, 0 0 2px #166e93, 0 0 3px #166e93, 0 0 4px #166e93, 0 0 5px #166e93;
+}
+
+#title-btn-play {
+    width: 20vw;
+    color: #166e93;
+    background-color: #1ea7e1 !important;
+    border: 3px solid #1989b8;
+    box-shadow: 0 .2em #166e93;
+}
