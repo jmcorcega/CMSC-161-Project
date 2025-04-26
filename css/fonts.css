@@ -1,0 +1,48 @@
+@font-face {
+    font-family: 'Kenney Mini Square';
+    src: url('/fonts/Kenney-Mini-Square.eot');
+    src: url('/fonts/Kenney-Mini-Square.eot?#iefix') format('embedded-opentype'),
+        url('/fonts/Kenney-Mini-Square.woff2') format('woff2'),
+        url('/fonts/Kenney-Mini-Square.woff') format('woff'),
+        url('/fonts/Kenney-Mini-Square.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Kenney Blocks';
+    src: url('/fonts/Kenney-Blocks.eot');
+    src: url('/fonts/Kenney-Blocks.eot?#iefix') format('embedded-opentype'),
+        url('/fonts/Kenney-Blocks.woff2') format('woff2'),
+        url('/fonts/Kenney-Blocks.woff') format('woff'),
+        url('/fonts/Kenney-Blocks.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Kenney Mini';
+    src: url('/fonts/Kenney-Mini.eot');
+    src: url('/fonts/Kenney-Mini.eot?#iefix') format('embedded-opentype'),
+        url('/fonts/Kenney-Mini.woff2') format('woff2'),
+        url('/fonts/Kenney-Mini.woff') format('woff'),
+        url('/fonts/Kenney-Mini.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Kenney Rocket';
+    src: url('/fonts/Kenney-Rocket.eot');
+    src: url('/fonts/Kenney-Rocket.eot?#iefix') format('embedded-opentype'),
+        url('/fonts/Kenney-Rocket.woff2') format('woff2'),
+        url('/fonts/Kenney-Rocket.woff') format('woff'),
+        url('/fonts/Kenney-Rocket.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
