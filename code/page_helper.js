@@ -80,6 +80,44 @@ function createCube() {
      -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0,
   ];
 
+  const t = [
+    // Front face
+    0, 0,
+    1, 0,
+    1, 1,
+    0, 1,
+  
+    // Back face
+    0, 0,
+    1, 0,
+    1, 1,
+    0, 1,
+  
+    // Top face
+    0, 0,
+    1, 0,
+    1, 1,
+    0, 1,
+  
+    // Bottom face
+    0, 0,
+    1, 0,
+    1, 1,
+    0, 1,
+  
+    // Right face
+    0, 0,
+    1, 0,
+    1, 1,
+    0, 1,
+  
+    // Left face
+    0, 0,
+    1, 0,
+    1, 1,
+    0, 1,
+  ];
+
   // Indices to triangles (optional — using drawArrays with ordered vertices)
   const orderedVerts = [
       0, 1, 2, 0, 2, 3,       // front
@@ -92,13 +130,15 @@ function createCube() {
 
   const finalVerts = [];
   const finalNormals = [];
+  const finalTexCoords = [];
   for (let i = 0; i < orderedVerts.length; i++) {
       let vi = orderedVerts[i];
       finalVerts.push(v[vi * 3], v[vi * 3 + 1], v[vi * 3 + 2]);
       finalNormals.push(n[vi * 3], n[vi * 3 + 1], n[vi * 3 + 2]);
+      finalTexCoords.push(t[vi * 2], t[vi * 2 + 1]);
   }
 
-  return { vertices: finalVerts, normals: finalNormals };
+  return { vertices: finalVerts, normals: finalNormals, textures: finalTexCoords };
 }
 
 function initShaderProgram(gl, vsSource, fsSource) {
