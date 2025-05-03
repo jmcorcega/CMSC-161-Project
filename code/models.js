@@ -1,37 +1,72 @@
-export function createRockGeometry(detail = 1) {
+export function createRockGeometry() {
     const vertices = [];
     const normals = [];
 
     const getRandom = (min, max) => Math.random() * (max - min) + min;
+    const subdivisions = 8;
 
-    const subdivisions = detail * 6; // controls "rockiness"
+    const topRing = [];
+    const bottomRing = [];
 
     for (let i = 0; i < subdivisions; i++) {
-        const angle1 = (Math.PI * 2 * i) / subdivisions;
-        const angle2 = (Math.PI * 2 * (i + 1)) / subdivisions;
+        const angle = (Math.PI * 2 * i) / subdivisions;
+        const baseRadius = getRandom(0.4, 0.5);
 
-        const r1 = getRandom(0.3, 0.5);
-        const r2 = getRandom(0.3, 0.5);
+        const x = Math.cos(angle) * baseRadius;
+        const z = Math.sin(angle) * baseRadius;
 
-        const y1 = getRandom(0, 0.2);
-        const y2 = getRandom(0, 0.2);
+        topRing.push([x, getRandom(0.2, 0.3), z]);
+        bottomRing.push([x, -getRandom(0.0, 0.1), z]);
+    }
 
-        const x1 = Math.cos(angle1) * r1;
-        const z1 = Math.sin(angle1) * r1;
-        const x2 = Math.cos(angle2) * r2;
-        const z2 = Math.sin(angle2) * r2;
+    const topCenter = [0, getRandom(0.3, 0.4), 0];
+    const bottomCenter = [0, -0.1, 0];
 
-        // Triangle: center top, outer ring1, outer ring2
-        vertices.push(0, 0.4 + getRandom(0, 0.1), 0);  // top center
-        vertices.push(x1, y1, z1);
-        vertices.push(x2, y2, z2);
+    for (let i = 0; i < subdivisions; i++) {
+        const next = (i + 1) % subdivisions;
 
-        // Normals (simple upward facing)
-        normals.push(0, 1, 0, 0, 1, 0, 0, 1, 0);
+        const t1 = topRing[i];
+        const t2 = topRing[next];
+        const b1 = bottomRing[i];
+        const b2 = bottomRing[next];
+
+        if (t1 == undefined || t2 == undefined || b1 == undefined || b2 == undefined) {
+            return { vertices, normals }; 
+        }
+
+        // Top cap triangle
+        vertices.push(...topCenter, ...t1, ...t2);
+        const n1 = computeNormal(topCenter, t1, t2);
+        normals.push(...n1, ...n1, ...n1);
+
+        // Side walls (two triangles per segment)
+        vertices.push(...t1, ...b1, ...b2);
+        const n2 = computeNormal(t1, b1, b2);
+        normals.push(...n2, ...n2, ...n2);
+
+        vertices.push(...t1, ...b2, ...t2);
+        const n3 = computeNormal(t1, b2, t2);
+        normals.push(...n3, ...n3, ...n3);
+
+        // Bottom cap triangle
+        vertices.push(...bottomCenter, ...b2, ...b1);
+        const n4 = computeNormal(bottomCenter, b2, b1);
+        normals.push(...n4, ...n4, ...n4);
     }
 
     return { vertices, normals };
 }
+
+function computeNormal(p1, p2, p3) {
+    const u = [p2[0] - p1[0], p2[1] - p1[1], p2[2] - p1[2]];
+    const v = [p3[0] - p1[0], p3[1] - p1[1], p3[2] - p1[2]];
+    const nx = u[1] * v[2] - u[2] * v[1];
+    const ny = u[2] * v[0] - u[0] * v[2];
+    const nz = u[0] * v[1] - u[1] * v[0];
+    const len = Math.hypot(nx, ny, nz);
+    return [nx / len, ny / len, nz / len];
+}
+
 
 export function createSnakeBody() {
     const v = [
