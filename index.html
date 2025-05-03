@@ -10,20 +10,68 @@
 
         <link rel="stylesheet" href="css/loading-screen.css">
         <link rel="stylesheet" href="css/title-screen.css">
+        <link rel="stylesheet" href="css/game-screen.css">
+        <link rel="stylesheet" href="css/about-screen.css">
+        <link rel="stylesheet" href="css/start-screen.css">
+
+        <meta name="darkreader-lock">
     </head>
     <body>
+        <div id="start-game">
+            <div>
+                <div class="loading-game-logo">
+                    <img src="img/game-logo.png">
+                </div>
+                <div class="font-mini start-game-text">
+                    <p class="font-rocket start-game-text-header animate__animated animate__pulse animate__infinite">
+                        Click or tap anywhere to continue
+                    </p>
+                    <p class="start-game-text-subtitle">
+                        Due to a privacy change on all major browsers, the page must now be interacted <b>first</b> in order
+                        for the page to have sounds.
+                    </p>
+                    <p class="start-game-text-final">
+                        Thank you for playing Snake 3D.<br>
+                        (C) 2025
+                    </p>
+                </div>
+            </div>
+        </div>
         <div id="game">
             <!-- This will be replaced programmatically by page templates -->
             <div id="page-container"></div>
             <div id="loading-screen" class="loading-screen animate__animated dialog-gone">
                 <div id="loading-screen-container">
                     <div class="loading-game-logo">
-                        <span class="title-game-name">Snek 3D</span>
+                        <span class="title-game-name">Snake 3D</span>
                     </div>
                     <div class="loading-progress-container">
-                        <p class="loading-text">Loading...</p>
                         <div class="progress">
                             <div id="loading-progress" class="bar shadow wiggle"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="dialog-bg-pause" class="dialog-container dialog-gone animate__animated">
+                <div id="dialog-pause" class="dialog dialog-gone animate__animated">
+                    <div>
+                        <div class="dialog-title">
+                            <h1>Paused</h1>
+                        </div>
+                        <div class="dialog-buttons">
+                            <div class="dialog-pause-buttons-container">
+                                <button id="dialog-btn-resume">Resume</button>
+                                <button id="dialog-btn-restart">Restart</button>
+                                <button id="dialog-btn-exit">Exit</button>
+                            </div>
+                            <div class="dialog-option-buttons">
+                                <button id="dialog-btn-music">
+                                    <img src="img/icons/musicOn.png">
+                                </button>
+                                <button id="dialog-btn-sound">
+                                    <img src="img/icons/audioOn.png">
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -44,12 +92,15 @@
         <script src="lib/progress_screen.js"></script>
         <script src="lib/page_helper.js"></script>
         <script src="lib/key_listener.js"></script>
+        <script src="lib/audio_service.js"></script>
         <script src="lib/storage.js"></script>
+        <script src="lib/dialog.js"></script>
+
         <!-- Put scripts here! -->
-        <script src="code/progress_screen.js"></script>
-        <script src="code/page_helper.js"></script>
-        <script src="code/key_listener.js"></script>
-        <script src="code/storage.js"></script>
         <script src="code/main.js"></script>
+        <script src="code/leaderboards.js"></script>
+        <script src="code/about.js"></script>
+        <script src="code/game.js"></script>
+        <script src="code/title.js"></script>
     </body>
 </html>

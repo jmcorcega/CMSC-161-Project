@@ -1,0 +1,45 @@
+
+
+/* Start Page */
+#start-game {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    padding-left: 30vw;
+    padding-right: 30vw;
+    margin: auto;
+}
+
+#start-game > div > .loading-game-logo {
+    padding-top: 8vh;
+    margin: auto;
+    display: flex;
+}
+
+#start-game > div > .loading-game-logo img {
+    margin: auto;
+}
+
+.start-game-text {
+    padding-top: 8vh;
+    width: 100%;
+    text-align: center;
+    color: #ffffff;
+}
+
+.start-game-text-header {
+    color: #3798C0;
+    font-size: 1.5rem;
+    padding-bottom: 8vh;
+    
+    text-shadow: 0 0 5px #3798C0, 0 0 10px #3798C0, 0 0 15px #3798C0, 0 0 20px #3798C0, 0 0 25px #3798C0;
+}
+
+.start-game-text-final {
+    padding-top: 4vh;
+    color: rgba(255, 255, 255, 0.5);
+}
+/* Start Page */

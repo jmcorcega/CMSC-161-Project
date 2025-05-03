@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <!-- This is an HTML template for the main game page!
+             Do not put any scripts or styles here as only the
+             body will be replaced programmatically by page templates -->
+
+        <!-- No scripts or styles here! -->
+    </head>
+    <body class="snake-game" id="page-container">
+        <div class="game-container">
+            <div>
+                <button class="game-header-btn" id="header-btn-pause">
+                    <img src="img/icons/pause.png">
+                </button>
+            </div>
+            <!-- Stats -->
+
+            <!-- Eaten -->
+            <div class="game-stat">
+                <img src="img/tileRed_06.png" class="game-stat-icon">
+                <p class="game-stat-text" id="eaten">0</p>
+            </div>
+
+            <!-- Score -->
+            <div class="game-stat">
+                <img src="img/coin_06.png" class="game-stat-icon">
+                <p class="game-stat-text" id="score">0</p>
+            </div>
+
+        </div>
+        <canvas id="game-canvas" class="game-canvas"></canvas>
+    </body>
+</html>

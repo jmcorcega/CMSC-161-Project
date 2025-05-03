@@ -1,6 +1,6 @@
 
 body {
-    width: 100vw;
+    width: 100%;
     height: 100vh;
     background-color: #121212;
     cursor: url('../img/cursor/normal.png'), auto;	
@@ -8,6 +8,12 @@ body {
     justify-content: center;
     align-items: center;
 }
+
+body, html {
+    margin: 0;
+    padding: 0;
+}
+
 
 ::-webkit-scrollbar {
     display: none;
@@ -63,8 +69,20 @@ button:active {
 }
 
 .dialog-container {
-    z-index: 10;
+    z-index: 100;
     transition: all 200ms;
+}
+
+.dialog-container {
+    display: flex;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
 }
 
 .dialog {
@@ -333,6 +351,7 @@ button:active {
 }
 
 #dialog-btn-music img, #dialog-btn-sound img {
+    height: 100%;
     filter: invert(51%) sepia(53%) saturate(3081%) hue-rotate(24deg) brightness(92%) contrast(97%);
 }
 /* Dialogs */

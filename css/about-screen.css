@@ -1,0 +1,67 @@
+
+.game-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    vertical-align: middle;
+}
+
+.game-header-btn {
+    height: 3vw;
+    width: 3vw;
+    color: #166e93;
+    background-color: #1ea7e1 !important;
+    border: 3px solid #1989b8;
+    box-shadow: 0 .2em #166e93;
+    padding: 2px 2px 2px 2px;
+}
+
+.game-header-btn img {
+    height: 100%;
+    width: 100%;
+}
+
+.game-header-btn img {
+    filter: invert(33%) sepia(39%) saturate(1036%) hue-rotate(153deg) brightness(99%) contrast(89%);
+}
+
+.game-header-text {
+    font-family: 'Kenney Mini Square';
+    margin: auto auto auto 1.5vw;
+    color: #166e93;
+    font-size: 2.5rem;
+}
+
+/* About Screen */
+
+#about-container {
+    z-index: 2;
+}
+
+.about-game-logo img {
+    height: 22vh;
+    width: auto;
+    margin-top: 19.75vh;
+    margin-bottom: 2vh;
+}
+
+.about-container {
+    bottom: 0;
+    min-width: 39vw;
+    align-items: center;
+    font-family: 'Kenney Mini';
+    text-align: center;
+}
+
+.about-title {
+    font-size: 1.5rem;
+    margin-bottom: 12vh;
+}
+
+.about-bottom-title {
+    font-size: 1rem;
+}
+.about-bottom-sub {
+    font-size: 0.75rem;
+}
+/* About Screen */

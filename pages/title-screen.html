@@ -7,10 +7,29 @@
 
         <!-- No scripts or styles here! -->
     </head>
-    <body id="page-container">
+    <body class="title-screen" id="page-container">
+        <div class="title-background"></div>
         <div class="title-buttons">
-            <span class="title-game-name">Snek 3D</span>
-            <button id="title-btn-play">Play!</button>
+            <span class="title-game-name">Snake 3D</span>
+            <div class="title-game-buttons">
+                <button id="title-btn-play">Play!</button>
+                <div class="game-buttons-horizontal">
+                    <button class="game-button-yellow game-button" id="title-btn-music">
+                        <img src="img/icons/musicOn.png">
+                    </button>
+                    <button class="game-button-yellow game-button" id="title-btn-sound">
+                        <img src="img/icons/audioOn.png">
+                    </button>
+                </div>
+                <button class="game-button-green game-button" id="title-btn-leaderboards">
+                    <img src="img/icons/leaderboardsComplex.png">
+                    Leaderboards
+                </button>
+                <button class="game-button-yellow game-button" id="title-btn-about">
+                    <img src="img/icons/information.png">
+                    About
+                </button>
+            </div>
         </div>
     </body>
 </html>

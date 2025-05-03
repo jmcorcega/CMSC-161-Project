@@ -46,3 +46,18 @@
     font-display: swap;
 }
 
+.font-mini-square {
+    font-family: 'Kenney Mini Square', sans-serif;
+}
+
+.font-blocks {
+    font-family: 'Kenney Blocks', sans-serif;
+}
+
+.font-mini {
+    font-family: 'Kenney Mini', sans-serif;
+}
+
+.font-rocket {
+    font-family: 'Kenney Rocket', sans-serif;
+}
