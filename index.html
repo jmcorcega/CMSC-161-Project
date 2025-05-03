@@ -10,6 +10,20 @@
 
         <link rel="stylesheet" href="css/loading-screen.css">
         <link rel="stylesheet" href="css/title-screen.css">
+        <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            height: 100%;
+        }
+        
+        canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+        }
+        </style>
     </head>
     <body>
         <div id="game">
@@ -47,7 +61,11 @@
         <script src="code/storage.js"></script>
         <script type="module" src="code/main.js"></script>
 
-        <canvas id="gameCanvas" width="1200" height="1000"></canvas>
-
+        <canvas id="gameCanvas"></canvas>
+        <script>
+            const canvas = document.getElementById('gameCanvas');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        </script>
     </body>
 </html>
