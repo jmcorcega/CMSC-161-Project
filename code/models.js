@@ -224,3 +224,51 @@ export function createSnakeHeadWithFeatures() {
         textures: [...head.textures, ...finalEyeUVs],  // Assuming default white texture for eyes
     };
 }
+
+export function createApple(segments = 12, rings = 12) {
+    const vertices = [];
+    const normals = [];
+    const indices = [];
+
+    for (let y = 0; y <= rings; y++) {
+        const v = y / rings;
+        const theta = v * Math.PI;
+        const sinTheta = Math.sin(theta);
+        const cosTheta = Math.cos(theta);
+
+        for (let x = 0; x <= segments; x++) {
+            const u = x / segments;
+            const phi = u * 2 * Math.PI;
+            const sinPhi = Math.sin(phi);
+            const cosPhi = Math.cos(phi);
+
+            // Base radius
+            let r = sinTheta;
+
+            // Apple-like deformation
+            r *= 1.0 + 0.2 * Math.pow(sinTheta, 2) * cosPhi; // bulge sides
+            const yOffset = cosTheta * (1.0 + 0.1 * sinTheta * sinPhi); // slightly flattened top and bottom
+
+            const px = r * cosPhi;
+            const py = yOffset;
+            const pz = r * sinPhi;
+
+            vertices.push(px, py, pz);
+            normals.push(px, py, pz); // approximate normal (normalize later if needed)
+        }
+    }
+
+    // Indices
+    for (let y = 0; y < rings; y++) {
+        for (let x = 0; x < segments; x++) {
+            const i1 = y * (segments + 1) + x;
+            const i2 = i1 + segments + 1;
+
+            indices.push(i1, i2, i1 + 1);
+            indices.push(i1 + 1, i2, i2 + 1);
+        }
+    }
+
+    return { vertices, normals, indices };
+}
+
