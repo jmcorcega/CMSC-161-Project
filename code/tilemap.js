@@ -1,4 +1,4 @@
-import { createRockGeometry, createGrassGeometry } from './models.js';
+import { createRockGeometry, createGrassGeometry, createPlantGeometry } from './models.js';
 
 export const tileSize = 1;
 export const gridSize = 20;
@@ -105,26 +105,51 @@ export function translate(x, y, z) {
 const rocks = [];
 const grasses = [];
 
-export function placeRocksAndGrass(rockCount = 20, grassCount = 100) {
+let sharedGrassGeometry = null;
+let sharedPlantGeometry = null;
+
+
+
+export function placeRocksAndGrass(rockCount = 20, grassCount = Object.keys(tileMap).length / 2) {
     const keys = Object.keys(tileMap);
+
+    // Compute map boundaries
+    let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
+    for (const key of keys) {
+        const tile = tileMap[key];
+        if (tile.x < minX) minX = tile.x;
+        if (tile.x > maxX) maxX = tile.x;
+        if (tile.z < minZ) minZ = tile.z;
+        if (tile.z > maxZ) maxZ = tile.z;
+    }
+
     let rockPlaced = 0;
     let grassPlaced = 0;
 
-    // Shuffle the keys to ensure randomness
+    // Shuffle tile keys
     for (let i = keys.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [keys[i], keys[j]] = [keys[j], keys[i]];
     }
 
+    // Initialize shared geometry
+    if (!sharedGrassGeometry) sharedGrassGeometry = createGrassGeometry();
+    if (!sharedPlantGeometry) sharedPlantGeometry = createPlantGeometry();
+
     for (let i = 0; i < keys.length; i++) {
         const tile = tileMap[keys[i]];
-
-        if (tile.occupied) continue;
+        // if (tile.occupied) continue;
+        
+        // avoid spawning at the edges/borders
+        if (
+            tile.x === minX || tile.x === maxX+1 ||
+            tile.z === minZ || tile.z === maxZ+1 ||
+            tile.occupied
+        ) continue;
 
         if (rockPlaced < rockCount) {
             const { vertices, normals } = createRockGeometry(Math.random() * 1.5 + 0.5);
-            const sizes = [0.6, 1.0, 1.2];
-            const scale = sizes[Math.floor(Math.random() * sizes.length)];
+            const scale = [0.6, 1.0, 1.2][Math.floor(Math.random() * 3)];
 
             rocks.push({
                 x: tile.x,
@@ -138,32 +163,31 @@ export function placeRocksAndGrass(rockCount = 20, grassCount = 100) {
             tile.object = 'rock';
             rockPlaced++;
         } else if (grassPlaced < grassCount) {
-            const numBlades = Math.floor(Math.random() * 3) + 2; 
-            const grassBlades = [];
+            const isPlant = grassPlaced % 7 === 0;
+            const numBlades = isPlant ? 1 : Math.floor(Math.random() * 3) + 8;
 
             for (let j = 0; j < numBlades; j++) {
-                const { vertices, normals } = createGrassGeometry();
+                const geometry = isPlant ? sharedPlantGeometry : sharedGrassGeometry;
 
-                const xPos = tile.x;
-                const zPos = tile.z;
+                const offsetX = isPlant ? 0 : (Math.random() - 0.5) * 1.0;
+                const offsetZ = isPlant ? 0 : (Math.random() - 0.5) * 1.0;
                 const rotation = Math.random() * Math.PI * 2;
 
-                grassBlades.push({
-                    vertices,
-                    normals,
-                    position: [xPos, 0, zPos],
+                grasses.push({
+                    vertices: geometry.vertices,
+                    normals: geometry.normals,
+                    position: [tile.x + offsetX, 0, tile.z + offsetZ],
                     rotation,
                 });
+
+                if (isPlant) break; // Only one plant per tile
             }
 
-            grasses.push(...grassBlades);
-            tile.occupied = true;
-            tile.object = 'grass';
             grassPlaced++;
         }
     }
-
 }
+
 
 export function drawRocks(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture, uForceLight, uLightDirection) {
     gl.uniform1f(uForceLight, 0.35); // Use actual lighting, don't force full brightness
@@ -198,7 +222,9 @@ export function drawRocks(gl, aPosition, aNormal, uModelMatrix, uColor, uUseText
 export function drawGrasses(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture, uForceLight, uLightDirection) {
     gl.uniform1f(uForceLight, 1.0);
     gl.uniform1i(uUseTexture, false);
-    gl.uniform3fv(uColor, [0.2, 0.7, 0.2]);
+    gl.uniform3fv(uColor, [0.30, 0.81, 0.24]);
+    // gl.uniform3fv(uColor, [0.34, 0.77, 0.28]);
+
     gl.uniform3fv(uLightDirection, [0.0, -1.0, 0.0]);
 
     for (let blade of grasses) {

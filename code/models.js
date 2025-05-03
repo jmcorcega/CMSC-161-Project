@@ -68,41 +68,123 @@ function computeNormal(p1, p2, p3) {
     return [nx / len, ny / len, nz / len];
 }
 
-export function createGrassGeometry() {
-    const height = Math.random() * 0.4 + 0.3;
-    const width = 0.03;
-    const curveAmount = 0.1;
+export function createGrassGeometry(bladeCount = Math.floor(Math.random() * 4) + 10) {
+    const clusterVertices = [];
+    const clusterNormals = [];
 
-    // Create a curved quad with 3 vertical segments
-    const segments = 3;
-    const vertices = [];
-    const normals = [];
+    for (let i = 0; i < bladeCount; i++) {
+        // const height = Math.random() * 0.3 + 0.2;
+        const height = Math.random() * 0.5;
+        const width = 0.05;
+        const curveAmount = 0.1;
+        const segments = 3;
 
-    for (let i = 0; i < segments; i++) {
-        const y1 = (i / segments) * height;
-        const y2 = ((i + 1) / segments) * height;
+        // Slight random offset per blade
+        const offsetX = (Math.random() - 0.5) * 0.1;
+        const offsetZ = (Math.random() - 0.5) * 0.1;
 
-        const z1 = Math.sin((i / segments) * Math.PI) * curveAmount;
-        const z2 = Math.sin(((i + 1) / segments) * Math.PI) * curveAmount;
+        // Slight random rotation per blade
+        const angle = Math.random() * Math.PI * 2;
+        const cosA = Math.cos(angle);
+        const sinA = Math.sin(angle);
 
-        // Left and right points for the quad segment
-        vertices.push(
-            -width / 2, y1, z1,
-             width / 2, y1, z1,
-            -width / 2, y2, z2,
+        for (let j = 0; j < segments; j++) {
+            const y1 = (j / segments) * height;
+            const y2 = ((j + 1) / segments) * height;
 
-             width / 2, y1, z1,
-             width / 2, y2, z2,
-            -width / 2, y2, z2
-        );
+            const z1 = Math.sin((j / segments) * Math.PI) * curveAmount;
+            const z2 = Math.sin(((j + 1) / segments) * Math.PI) * curveAmount;
 
-        for (let j = 0; j < 6; j++) {
-            normals.push(0, 0.7, 0.7); // Gently upward and outward
+            const leftX1 = -width / 2;
+            const rightX1 = width / 2;
+
+            const leftX2 = -width / 2;
+            const rightX2 = width / 2;
+
+            // Apply rotation and offset to each vertex
+            const verts = [
+                [leftX1, y1, z1],
+                [rightX1, y1, z1],
+                [leftX2, y2, z2],
+                [rightX1, y1, z1],
+                [rightX2, y2, z2],
+                [leftX2, y2, z2],
+            ];
+
+            for (let [x, y, z] of verts) {
+                const rx = x * cosA - z * sinA + offsetX;
+                const rz = x * sinA + z * cosA + offsetZ;
+                clusterVertices.push(rx, y, rz);
+            }
+
+            for (let k = 0; k < 6; k++) {
+                clusterNormals.push(0, 0.7, 0.7); // gently upwards
+            }
         }
     }
 
+    return {
+        vertices: clusterVertices,
+        normals: clusterNormals
+    };
+}
+
+export function createPlantGeometry() {
+    const stemHeight = 0.7;
+    const stemWidth = 0.04;
+
+    const stemVertices = [];
+    const stemNormals = [];
+
+    // Simple vertical stem (as a thin quad)
+    stemVertices.push(
+        -stemWidth / 2, 0, 0,
+         stemWidth / 2, 0, 0,
+        -stemWidth / 2, stemHeight, 0,
+
+         stemWidth / 2, 0, 0,
+         stemWidth / 2, stemHeight, 0,
+        -stemWidth / 2, stemHeight, 0
+    );
+    for (let i = 0; i < 6; i++) {
+        stemNormals.push(0, 0, 1);
+    }
+
+    const leaves = [];
+    const leafNormals = [];
+
+    const leafCount = Math.random() * 3 + 1;
+    const leafWidth = 0.25;
+    const leafHeight = 0.15;
+
+    for (let i = 1; i <= leafCount; i++) {
+        const yPos = (i / (leafCount + 1)) * stemHeight;
+        const angle = (i % 2 === 0) ? Math.PI / 4 : -Math.PI / 4;
+
+        // Simple leaf quad, positioned out from the stem
+        leaves.push(
+            0, yPos, 0,
+            leafWidth * Math.cos(angle), yPos + leafHeight / 2, leafWidth * Math.sin(angle),
+            leafWidth * Math.cos(angle), yPos - leafHeight / 2, leafWidth * Math.sin(angle)
+        );
+
+        leaves.push(
+            0, yPos, 0,
+            leafWidth * Math.cos(angle), yPos - leafHeight / 2, leafWidth * Math.sin(angle),
+            0, yPos, 0
+        );
+
+        for (let j = 0; j < 6; j++) {
+            leafNormals.push(0, 0.5, 0.5);
+        }
+    }
+
+    const vertices = [...stemVertices, ...leaves];
+    const normals = [...stemNormals, ...leafNormals];
+
     return { vertices, normals };
 }
+
 
 
 
