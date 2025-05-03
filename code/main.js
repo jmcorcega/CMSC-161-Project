@@ -1,4 +1,5 @@
-import { createTileMap, loadGrassTexture, drawTiles, tileMap, placeRocksAndGrass, drawRocks, drawGrasses } from './tilemap.js';
+import { createTileMap, loadGrassTexture, placeRocksAndGrass, placeLogs, 
+    drawTiles, drawRocks, drawLogs, drawGrasses } from './tilemap.js';
 import { initWebGL } from './init_webgl.js';  // Import the initWebGL function
 import { drawSnake, loadSnakeTexture } from './snake-map.js';
 
@@ -56,8 +57,8 @@ async function startGame() {
     }, 350);
 
     createTileMap();
-    // placeRocks();
     placeRocksAndGrass();
+    placeLogs();
 
     loadGrassTexture(gl, () => {
         render(); // or any other function to run after texture is ready
@@ -138,6 +139,7 @@ async function startGame() {
         
         drawTiles(gl, aPosition, aNormal, aTexCoord, uModelMatrix, uUseTexture, uTexture);
         drawRocks(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture, uForceLight, uLightDirection);
+        drawLogs(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture, uForceLight, uLightDirection);
         drawGrasses(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture, uForceLight, uLightDirection);
 
         gl.uniform1f(uForceLight, 0.0); 

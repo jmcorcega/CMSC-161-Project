@@ -68,6 +68,51 @@ function computeNormal(p1, p2, p3) {
     return [nx / len, ny / len, nz / len];
 }
 
+export function createLogGeometry(height = 1.5) {
+    // Log dimensions
+    const width = 1;
+    const depth = 1;
+    const hsx = width / 2;
+    const hsy = height / 2;
+    const hsz = depth / 2;
+
+    // Colors: ends (lighter), body (darker)
+    const endColor = [0.6, 0.4, 0.2];   // Lighter ends
+    const bodyColor = [0.3, 0.2, 0.1];  // Darker sides
+
+    const faces = [
+        // Front face (z+)
+        { normal: [0, 0, 1], color: bodyColor, verts: [-hsx, -hsy, hsz,  hsx, -hsy, hsz,  hsx, hsy, hsz,  -hsx, hsy, hsz] },
+        // Back face (z-)
+        { normal: [0, 0, -1], color: bodyColor, verts: [hsx, -hsy, -hsz, -hsx, -hsy, -hsz, -hsx, hsy, -hsz, hsx, hsy, -hsz] },
+        // Top face (y+)
+        { normal: [0, 1, 0], color: bodyColor, verts: [-hsx, hsy, hsz,  hsx, hsy, hsz,  hsx, hsy, -hsz, -hsx, hsy, -hsz] },
+        // Bottom face (y-)
+        { normal: [0, -1, 0], color: bodyColor, verts: [-hsx, -hsy, -hsz,  hsx, -hsy, -hsz,  hsx, -hsy, hsz, -hsx, -hsy, hsz] },
+        // Right face (x+)
+        { normal: [1, 0, 0], color: endColor, verts: [hsx, -hsy, hsz, hsx, -hsy, -hsz, hsx, hsy, -hsz, hsx, hsy, hsz] },
+        // Left face (x-)
+        { normal: [-1, 0, 0], color: endColor, verts: [-hsx, -hsy, -hsz, -hsx, -hsy, hsz, -hsx, hsy, hsz, -hsx, hsy, -hsz] },
+    ];
+
+    const vertices = [];
+    const normals = [];
+    const colors = [];
+
+    for (const face of faces) {
+        for (let i = 0; i < 6; i++) {
+            const vi = [0, 1, 2, 0, 2, 3][i]; // triangle indices
+            const offset = vi * 3;
+            vertices.push(...face.verts.slice(offset, offset + 3));
+            normals.push(...face.normal);
+            colors.push(face.color);
+        }
+    }
+
+    return { vertices, normals, colors };
+}
+
+
 export function createGrassGeometry(bladeCount = Math.floor(Math.random() * 4) + 10) {
     const clusterVertices = [];
     const clusterNormals = [];
