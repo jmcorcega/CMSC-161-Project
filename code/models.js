@@ -33,38 +33,39 @@ export function createRockGeometry(detail = 1) {
     return { vertices, normals };
 }
 
-export function createSnakeBody() {
+export function createSnakeBody(height) {
     const v = [
-        -0.5, -0.5,  0.5,  // front face
-         0.5, -0.5,  0.5,
-         0.5,  0.5,  0.5,
-        -0.5,  0.5,  0.5,
-  
-        -0.5, -0.5, -0.5,  // back face
-        -0.5,  0.5, -0.5,
-         0.5,  0.5, -0.5,
-         0.5, -0.5, -0.5,
-  
-        -0.5,  0.5, -0.5,  // top
-        -0.5,  0.5,  0.5,
-         0.5,  0.5,  0.5,
-         0.5,  0.5, -0.5,
-  
-        -0.5, -0.5, -0.5,  // bottom
-         0.5, -0.5, -0.5,
-         0.5, -0.5,  0.5,
-        -0.5, -0.5,  0.5,
-  
-         0.5, -0.5, -0.5,  // right
-         0.5,  0.5, -0.5,
-         0.5,  0.5,  0.5,
-         0.5, -0.5,  0.5,
-  
-        -0.5, -0.5, -0.5,  // left
-        -0.5, -0.5,  0.5,
-        -0.5,  0.5,  0.5,
-        -0.5,  0.5, -0.5,
+        -0.5, -height,  0.5,  // front face
+         0.5, -height,  0.5,
+         0.5,  height,  0.5,
+        -0.5,  height,  0.5,
+    
+        -0.5, -height, -0.5,  // back face
+        -0.5,  height, -0.5,
+         0.5,  height, -0.5,
+         0.5, -height, -0.5,
+    
+        -0.5,  height, -0.5,  // top
+        -0.5,  height,  0.5,
+         0.5,  height,  0.5,
+         0.5,  height, -0.5,
+    
+        -0.5, -height, -0.5,  // bottom
+         0.5, -height, -0.5,
+         0.5, -height,  0.5,
+        -0.5, -height,  0.5,
+    
+         0.5, -height, -0.5,  // right
+         0.5,  height, -0.5,
+         0.5,  height,  0.5,
+         0.5, -height,  0.5,
+    
+        -0.5, -height, -0.5,  // left
+        -0.5, -height,  0.5,
+        -0.5,  height,  0.5,
+        -0.5,  height, -0.5,
     ];
+    
   
     const n = [
         // normals for each face
@@ -135,4 +136,56 @@ export function createSnakeBody() {
     }
   
     return { vertices: finalVerts, normals: finalNormals, textures: finalTexCoords };
+}
+
+export function createSnakeHeadWithFeatures() {
+    const head = createSnakeBody(0.5);
+
+    const eyeRadius = 0.07;
+    const eyeDepth = 0.51; // just outside front face
+    const eyeY = 0.2;
+    const eyeXOffset = 0.2;
+
+    // Eyes: two small quads (could be replaced by textured spheres for realism)
+    const eyes = [
+        // Left eye
+        -eyeXOffset - eyeRadius, eyeY - eyeRadius, eyeDepth,
+        -eyeXOffset + eyeRadius, eyeY - eyeRadius, eyeDepth,
+        -eyeXOffset + eyeRadius, eyeY + eyeRadius, eyeDepth,
+        -eyeXOffset - eyeRadius, eyeY + eyeRadius, eyeDepth,
+
+        // Right eye
+         eyeXOffset - eyeRadius, eyeY - eyeRadius, eyeDepth,
+         eyeXOffset + eyeRadius, eyeY - eyeRadius, eyeDepth,
+         eyeXOffset + eyeRadius, eyeY + eyeRadius, eyeDepth,
+         eyeXOffset - eyeRadius, eyeY + eyeRadius, eyeDepth,
+    ];
+
+    const eyeNormals = new Array(6 * 3).fill(0).map((_, i) => (i % 3 === 2 ? 1 : 0)); // z normal
+    
+    // Modify UVs to make eyes white (no texture)
+    const eyeUVs = [
+        0, 0, 1, 0, 1, 1, 0, 1, // Left eye
+        0, 0, 1, 0, 1, 1, 0, 1, // Right eye
+    ];
+
+    const eyeIndices = [
+        0, 1, 2, 0, 2, 3,  // left eye
+        4, 5, 6, 4, 6, 7   // right eye
+    ];
+
+    const finalEyes = [], finalEyeNormals = [], finalEyeUVs = [];
+    for (let i = 0; i < eyeIndices.length; i++) {
+        let vi = eyeIndices[i];
+        finalEyes.push(eyes[vi * 3], eyes[vi * 3 + 1], eyes[vi * 3 + 2]);
+        finalEyeNormals.push(0, 0, 1);
+        finalEyeUVs.push(eyeUVs[vi * 2], eyeUVs[vi * 2 + 1]);
+    }
+
+    // Combine all except for tongue
+    return {
+        vertices: [...head.vertices, ...finalEyes],
+        normals: [...head.normals, ...finalEyeNormals],
+        textures: [...head.textures, ...finalEyeUVs],  // Assuming default white texture for eyes
+    };
 }

@@ -24,7 +24,7 @@ export function createTileMap() {
 export function loadGrassTexture(gl, callback) {
     grassTexture = gl.createTexture();
     const grassImage = new Image();
-    grassImage.src = '../img/grass.png';
+    grassImage.src = '../img/grass-1.png';
 
     grassImage.onload = () => {
         gl.bindTexture(gl.TEXTURE_2D, grassTexture);

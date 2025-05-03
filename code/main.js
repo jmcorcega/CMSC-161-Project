@@ -26,7 +26,8 @@ async function startGame() {
         uLightDirection, uColor, uForceLight,
         aTexCoord, uUseTexture, uTexture, 
         uSampler, positionBuffer, normalBuffer, 
-        texCoordBuffer, vertices
+        texCoordBuffer, vertices, verticesHead, 
+        normalsHead, texturesHead
     } = await initWebGL();
 
     // Snake with cube segments 
@@ -63,7 +64,7 @@ async function startGame() {
 
     loadSnakeTexture(gl, () => {
         render(); // or any other function to run after texture is ready
-    }, 4);
+    }, 1);
         
     document.addEventListener('keydown', (e) => {
         if (e.key === 'a') {
@@ -125,7 +126,14 @@ async function startGame() {
         const projMatrix = perspective(45, canvas.width / canvas.height, 0.1, 100);
         const viewMatrix = lookAt(eye, center, up);
 
-        drawSnake(gl, positionBuffer, normalBuffer, texCoordBuffer, aPosition, aNormal, aTexCoord, uViewMatrix, uProjMatrix, uModelMatrix, uUseTexture, uSampler, uLightDirection, uForceLight, projMatrix, viewMatrix, snake, vertices);
+        drawSnake(gl, positionBuffer, normalBuffer, texCoordBuffer,
+            aPosition, aNormal, aTexCoord,
+            uViewMatrix, uProjMatrix, uModelMatrix,
+            uUseTexture, uSampler, uLightDirection, uForceLight,
+            projMatrix, viewMatrix,
+            snake,
+            vertices, verticesHead, normalsHead, texturesHead
+        );
         drawGrassTiles(gl, aPosition, aNormal, aTexCoord, uModelMatrix, uUseTexture, uTexture);
         drawRocks(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture);
 

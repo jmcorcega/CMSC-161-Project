@@ -1,4 +1,4 @@
-import { createSnakeBody } from "./models.js";
+import { createSnakeBody, createSnakeHeadWithFeatures } from "./models.js";
 
 async function loadShaderSource(url) {
     const response = await fetch(url);
@@ -41,7 +41,13 @@ export async function initWebGL() {
     const uSampler = gl.getUniformLocation(shaderProgram, 'uSampler')
 
     // Create buffers for the cube and grid
-    const { vertices, normals, textures } = createSnakeBody();
+    const {
+        vertices: verticesHead,
+        normals: normalsHead,
+        textures: texturesHead
+    } = createSnakeHeadWithFeatures();
+
+    const { vertices, normals, textures } = createSnakeBody(0.3);
     const positionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
@@ -53,7 +59,6 @@ export async function initWebGL() {
     const texCoordBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textures), gl.STATIC_DRAW);
-
     // Return all necessary WebGL objects
     return {
         canvas,
@@ -76,5 +81,8 @@ export async function initWebGL() {
         texCoordBuffer,
         vertices,
         textures,
+        verticesHead, 
+        normalsHead, 
+        texturesHead
     };
 }
