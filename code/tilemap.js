@@ -101,50 +101,65 @@ export function translate(x, y, z) {
     ]);
 }
 
-// Number of rocks to place
-const NUM_ROCKS = 10;
-export const rocks = []; // Store rock positions
+export const rocks = [];
 
-export function placeRocks() {
+export function placeRocks(count = 20) {
     const keys = Object.keys(tileMap);
     let placed = 0;
 
-    while (placed < NUM_ROCKS && keys.length > 0) {
-        const randIndex = Math.floor(Math.random() * keys.length);
-        const key = keys.splice(randIndex, 1)[0];
+    while (placed < count && keys.length > 0) {
+        const index = Math.floor(Math.random() * keys.length);
+        const key = keys.splice(index, 1)[0];
         const tile = tileMap[key];
 
         if (!tile.occupied) {
+            const { vertices, normals } = createRockGeometry(Math.random() * 1.5 + 0.5);
+
+            const sizes = [0.6, 1.0, 1.2]; // Small, Medium, Large
+            const scale = sizes[Math.floor(Math.random() * sizes.length)];
+
             tile.occupied = true;
             tile.object = 'rock';
-            rocks.push({ x: tile.x, z: tile.z });
+
+            rocks.push({
+                x: tile.x,
+                z: tile.z,
+                vertices,
+                normals,
+                scale,
+            });
+
             placed++;
         }
     }
 }
 
-export function drawRocks(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture) {
-    const { vertices, normals } = createRockGeometry();
 
-    const posBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-    gl.vertexAttribPointer(aPosition, 3, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(aPosition);
-
-    const normalBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
-    gl.vertexAttribPointer(aNormal, 3, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(aNormal);
-
+export function drawRocks(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture, uForceLight, uLightDirection) {
+    gl.uniform1f(uForceLight, 0.35); // Use actual lighting, don't force full brightness
     gl.uniform1i(uUseTexture, false); 
-    gl.uniform3fv(uColor, [0.5, 0.5, 0.5]);
-    // gl.uniform3fv(uColor, [1.0, 0.5, 0.2]); // orange for snake
+    gl.uniform3fv(uColor, [0.70, 0.70, 0.70]); // Gray rock base color
+    gl.uniform3fv(uLightDirection, [0.8, -1.0, 0.0]);
 
     for (let rock of rocks) {
-        const modelMatrix = translate(rock.x, 0, rock.z);
+        const posBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(rock.vertices), gl.STATIC_DRAW);
+        gl.vertexAttribPointer(aPosition, 3, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(aPosition);
+
+        const normalBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(rock.normals), gl.STATIC_DRAW);
+        gl.vertexAttribPointer(aNormal, 3, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(aNormal);
+
+        // Apply scaling and translation
+        const modelMatrix = mat4.create();
+        mat4.translate(modelMatrix, modelMatrix, [rock.x, 0, rock.z]);
+        mat4.scale(modelMatrix, modelMatrix, [rock.scale, rock.scale, rock.scale]);
+
         gl.uniformMatrix4fv(uModelMatrix, false, modelMatrix);
-        gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 3);
+        gl.drawArrays(gl.TRIANGLES, 0, rock.vertices.length / 3);
     }
 }

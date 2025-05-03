@@ -64,7 +64,7 @@ async function startGame() {
 
     loadSnakeTexture(gl, () => {
         render(); // or any other function to run after texture is ready
-    }, 1);
+    }, 5);
         
     document.addEventListener('keydown', (e) => {
         if (e.key === 'a') {
@@ -135,17 +135,7 @@ async function startGame() {
             vertices, verticesHead, normalsHead, texturesHead
         );
         drawGrassTiles(gl, aPosition, aNormal, aTexCoord, uModelMatrix, uUseTexture, uTexture);
-        drawRocks(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture);
-
-        // // Draw grid
-        // gl.uniform3fv(uColor, [1.0, 1.0, 1.0]);
-        // gl.uniform1f(uForceLight, 0.9); 
-        // gl.uniformMatrix4fv(uModelMatrix, false, identity());
-        // gl.bindBuffer(gl.ARRAY_BUFFER, gridBuffer);
-        // gl.vertexAttribPointer(aPosition, 3, gl.FLOAT, false, 0, 0);
-        // gl.enableVertexAttribArray(aPosition);
-        // gl.disableVertexAttribArray(aNormal); // grid has no normals
-        // gl.drawArrays(gl.LINES, 0, gridLines.length / 3);
+        drawRocks(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture, uForceLight, uLightDirection);
 
         gl.uniform1f(uForceLight, 0.0); 
     }
