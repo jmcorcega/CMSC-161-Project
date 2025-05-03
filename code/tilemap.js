@@ -1,4 +1,4 @@
-import { createRockGeometry } from './models.js';
+import { createRockGeometry, createGrassGeometry } from './models.js';
 
 export const tileSize = 1;
 export const gridSize = 20;
@@ -39,7 +39,7 @@ export function loadGrassTexture(gl, callback) {
     };
 }
 
-export function drawGrassTiles(gl, aPosition, aNormal, aTexCoord, uModelMatrix, uUseTexture, uTexture) {
+export function drawTiles(gl, aPosition, aNormal, aTexCoord, uModelMatrix, uUseTexture, uTexture) {
     gl.uniform1i(uUseTexture, true);
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, grassTexture);
@@ -101,25 +101,30 @@ export function translate(x, y, z) {
     ]);
 }
 
-export const rocks = [];
 
-export function placeRocks(count = 20) {
+const rocks = [];
+const grasses = [];
+
+export function placeRocksAndGrass(rockCount = 20, grassCount = 100) {
     const keys = Object.keys(tileMap);
-    let placed = 0;
+    let rockPlaced = 0;
+    let grassPlaced = 0;
 
-    while (placed < count && keys.length > 0) {
-        const index = Math.floor(Math.random() * keys.length);
-        const key = keys.splice(index, 1)[0];
-        const tile = tileMap[key];
+    // Shuffle the keys to ensure randomness
+    for (let i = keys.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [keys[i], keys[j]] = [keys[j], keys[i]];
+    }
 
-        if (!tile.occupied) {
+    for (let i = 0; i < keys.length; i++) {
+        const tile = tileMap[keys[i]];
+
+        if (tile.occupied) continue;
+
+        if (rockPlaced < rockCount) {
             const { vertices, normals } = createRockGeometry(Math.random() * 1.5 + 0.5);
-
-            const sizes = [0.6, 1.0, 1.2]; // Small, Medium, Large
+            const sizes = [0.6, 1.0, 1.2];
             const scale = sizes[Math.floor(Math.random() * sizes.length)];
-
-            tile.occupied = true;
-            tile.object = 'rock';
 
             rocks.push({
                 x: tile.x,
@@ -129,11 +134,36 @@ export function placeRocks(count = 20) {
                 scale,
             });
 
-            placed++;
+            tile.occupied = true;
+            tile.object = 'rock';
+            rockPlaced++;
+        } else if (grassPlaced < grassCount) {
+            const numBlades = Math.floor(Math.random() * 3) + 2; 
+            const grassBlades = [];
+
+            for (let j = 0; j < numBlades; j++) {
+                const { vertices, normals } = createGrassGeometry();
+
+                const xPos = tile.x;
+                const zPos = tile.z;
+                const rotation = Math.random() * Math.PI * 2;
+
+                grassBlades.push({
+                    vertices,
+                    normals,
+                    position: [xPos, 0, zPos],
+                    rotation,
+                });
+            }
+
+            grasses.push(...grassBlades);
+            tile.occupied = true;
+            tile.object = 'grass';
+            grassPlaced++;
         }
     }
-}
 
+}
 
 export function drawRocks(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture, uForceLight, uLightDirection) {
     gl.uniform1f(uForceLight, 0.35); // Use actual lighting, don't force full brightness
@@ -163,3 +193,33 @@ export function drawRocks(gl, aPosition, aNormal, uModelMatrix, uColor, uUseText
         gl.drawArrays(gl.TRIANGLES, 0, rock.vertices.length / 3);
     }
 }
+
+
+export function drawGrasses(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture, uForceLight, uLightDirection) {
+    gl.uniform1f(uForceLight, 1.0);
+    gl.uniform1i(uUseTexture, false);
+    gl.uniform3fv(uColor, [0.2, 0.7, 0.2]);
+    gl.uniform3fv(uLightDirection, [0.0, -1.0, 0.0]);
+
+    for (let blade of grasses) {
+        const posBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(blade.vertices), gl.STATIC_DRAW);
+        gl.vertexAttribPointer(aPosition, 3, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(aPosition);
+
+        const normalBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(blade.normals), gl.STATIC_DRAW);
+        gl.vertexAttribPointer(aNormal, 3, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(aNormal);
+
+        const modelMatrix = mat4.create();
+        mat4.translate(modelMatrix, modelMatrix, blade.position);
+        mat4.rotateY(modelMatrix, modelMatrix, blade.rotation);
+
+        gl.uniformMatrix4fv(uModelMatrix, false, modelMatrix);
+        gl.drawArrays(gl.TRIANGLES, 0, blade.vertices.length / 3);
+    }
+}
+

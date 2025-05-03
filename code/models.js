@@ -1,8 +1,9 @@
+const getRandom = (min, max) => Math.random() * (max - min) + min;
+
 export function createRockGeometry() {
     const vertices = [];
     const normals = [];
 
-    const getRandom = (min, max) => Math.random() * (max - min) + min;
     const subdivisions = 8;
 
     const topRing = [];
@@ -66,6 +67,43 @@ function computeNormal(p1, p2, p3) {
     const len = Math.hypot(nx, ny, nz);
     return [nx / len, ny / len, nz / len];
 }
+
+export function createGrassGeometry() {
+    const height = Math.random() * 0.4 + 0.3;
+    const width = 0.03;
+    const curveAmount = 0.1;
+
+    // Create a curved quad with 3 vertical segments
+    const segments = 3;
+    const vertices = [];
+    const normals = [];
+
+    for (let i = 0; i < segments; i++) {
+        const y1 = (i / segments) * height;
+        const y2 = ((i + 1) / segments) * height;
+
+        const z1 = Math.sin((i / segments) * Math.PI) * curveAmount;
+        const z2 = Math.sin(((i + 1) / segments) * Math.PI) * curveAmount;
+
+        // Left and right points for the quad segment
+        vertices.push(
+            -width / 2, y1, z1,
+             width / 2, y1, z1,
+            -width / 2, y2, z2,
+
+             width / 2, y1, z1,
+             width / 2, y2, z2,
+            -width / 2, y2, z2
+        );
+
+        for (let j = 0; j < 6; j++) {
+            normals.push(0, 0.7, 0.7); // Gently upward and outward
+        }
+    }
+
+    return { vertices, normals };
+}
+
 
 
 export function createSnakeBody(height) {
