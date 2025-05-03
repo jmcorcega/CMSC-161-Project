@@ -1,5 +1,6 @@
 import { createTileMap, loadGrassTexture, drawGrassTiles, tileMap, placeRocks, drawRocks } from './tilemap.js';
 import { initWebGL } from './init_webgl.js';  // Import the initWebGL function
+import { drawSnake, loadSnakeTexture } from './snake-map.js';
 
 showLoadingScreen();
 loadPage('pages/title-screen.html');
@@ -23,17 +24,17 @@ async function startGame() {
         aPosition, aNormal,
         uModelMatrix, uViewMatrix, uProjMatrix,
         uLightDirection, uColor, uForceLight,
-        aTexCoord, uUseTexture, uTexture,
-        positionBuffer, normalBuffer, vertices
+        aTexCoord, uUseTexture, uTexture, 
+        uSampler, positionBuffer, normalBuffer, 
+        texCoordBuffer, vertices
     } = await initWebGL();
 
     // Snake with cube segments 
     const snake = [
-        { x: 0.5, y: 0.5 },    // head
-        { x: -0.5, y: 0.5 },   // body 
-        { x: -1.5, y: 0.5 },   
-        { x: -2.5, y: 0.5 },   
-        { x: -3.5, y: 0.5 },   
+        { x: 0, y: 0 },    // head
+        { x: -1, y: 0 },   
+        { x: -2, y: 0 },   
+        { x: -3, y: 0 },   
     ];
 
     let positionTrail = [];  // for movement history
@@ -59,6 +60,10 @@ async function startGame() {
     loadGrassTexture(gl, () => {
         render(); // or any other function to run after texture is ready
     });
+
+    loadSnakeTexture(gl, () => {
+        render(); // or any other function to run after texture is ready
+    }, 4);
         
     document.addEventListener('keydown', (e) => {
         if (e.key === 'a') {
@@ -119,42 +124,8 @@ async function startGame() {
     
         const projMatrix = perspective(45, canvas.width / canvas.height, 0.1, 100);
         const viewMatrix = lookAt(eye, center, up);
-    
-        gl.uniformMatrix4fv(uViewMatrix, false, viewMatrix);
-        gl.uniformMatrix4fv(uProjMatrix, false, projMatrix);
-        gl.uniform3fv(uLightDirection, [0.5, 1.0, 0.5]);
-    
-        // Bind buffers
-        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-        gl.vertexAttribPointer(aPosition, 3, gl.FLOAT, false, 0, 0);
-        gl.enableVertexAttribArray(aPosition);
-    
-        gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
-        gl.vertexAttribPointer(aNormal, 3, gl.FLOAT, false, 0, 0);
-        gl.enableVertexAttribArray(aNormal);
-    
-        gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
-        gl.vertexAttribPointer(aTexCoord, 2, gl.FLOAT, false, 0, 0);
-        gl.enableVertexAttribArray(aTexCoord);
-    
-        // Draw snake (with texture)
-        gl.uniform3fv(uColor, [1.0, 0.5, 0.2]); // orange for snake
-    
-        // Bind texture only for the snake
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.uniform1i(gl.getUniformLocation(shaderProgram, 'uSampler'), 0);
-    
-        // Optional: Apply lighting to the snake
-        gl.uniform1f(uForceLight, 0.4); 
-        gl.uniform1f(uUseTexture, 1.0);
-        // Draw each snake segment
-        for (let segment of snake) {
-            const modelMatrix = translate(segment.x, 0.5, segment.y);
-            gl.uniformMatrix4fv(uModelMatrix, false, modelMatrix);
-            gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 3);
-        }
 
+        drawSnake(gl, positionBuffer, normalBuffer, texCoordBuffer, aPosition, aNormal, aTexCoord, uViewMatrix, uProjMatrix, uModelMatrix, uUseTexture, uSampler, uLightDirection, uForceLight, projMatrix, viewMatrix, snake, vertices);
         drawGrassTiles(gl, aPosition, aNormal, aTexCoord, uModelMatrix, uUseTexture, uTexture);
         drawRocks(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture);
 

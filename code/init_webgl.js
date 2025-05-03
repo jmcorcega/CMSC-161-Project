@@ -1,3 +1,5 @@
+import { createSnakeBody } from "./models.js";
+
 async function loadShaderSource(url) {
     const response = await fetch(url);
     return await response.text();
@@ -36,9 +38,10 @@ export async function initWebGL() {
     const aTexCoord = gl.getAttribLocation(shaderProgram, 'aTexCoord');
     const uUseTexture = gl.getUniformLocation(shaderProgram, 'uUseTexture');
     const uTexture = gl.getUniformLocation(shaderProgram, 'uTexture');
+    const uSampler = gl.getUniformLocation(shaderProgram, 'uSampler')
 
     // Create buffers for the cube and grid
-    const { vertices, normals } = createCube();
+    const { vertices, normals, textures } = createSnakeBody();
     const positionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
@@ -46,6 +49,10 @@ export async function initWebGL() {
     const normalBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
+
+    const texCoordBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textures), gl.STATIC_DRAW);
 
     // Return all necessary WebGL objects
     return {
@@ -63,8 +70,11 @@ export async function initWebGL() {
         aTexCoord,
         uUseTexture,
         uTexture,
+        uSampler,
         positionBuffer,
         normalBuffer,
-        vertices
+        texCoordBuffer,
+        vertices,
+        textures,
     };
 }
