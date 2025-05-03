@@ -1,4 +1,4 @@
-import { createTileMap, loadGrassTexture, drawGrassTiles, tileMap } from './tilemap.js';
+import { createTileMap, loadGrassTexture, drawGrassTiles, tileMap, placeRocks, drawRocks } from './tilemap.js';
 import { initWebGL } from './init_webgl.js';  // Import the initWebGL function
 
 showLoadingScreen();
@@ -54,6 +54,8 @@ async function startGame() {
     }, 350);
 
     createTileMap();
+    placeRocks();
+
     loadGrassTexture(gl, () => {
         render(); // or any other function to run after texture is ready
     });
@@ -146,7 +148,7 @@ async function startGame() {
         }
 
         drawGrassTiles(gl, aPosition, aNormal, aTexCoord, uModelMatrix, uUseTexture, uTexture);
-
+        drawRocks(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture);
 
         // // Draw grid
         // gl.uniform3fv(uColor, [1.0, 1.0, 1.0]);
