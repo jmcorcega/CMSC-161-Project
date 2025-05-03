@@ -102,7 +102,7 @@ export function translate(x, y, z) {
 }
 
 export const rocks = [];
-export let food = [];
+export let food = null;
 
 export function placeRocks(count = 20) {
     const keys = Object.keys(tileMap);

@@ -1,4 +1,4 @@
-import { createTileMap, loadGrassTexture, drawGrassTiles, tileMap, placeRocks, drawRocks, drawFood, placeFood } from './tilemap.js';
+import { createTileMap, loadGrassTexture, drawGrassTiles, tileMap, placeRocks, drawRocks, drawFood, placeFood, food } from './tilemap.js';
 import { initWebGL } from './init_webgl.js';  // Import the initWebGL function
 import { drawSnake, loadSnakeTexture } from './snake-map.js';
 
@@ -12,11 +12,9 @@ var interval = setInterval(function () {
     if (progress >= 100) {
         clearInterval(interval);
         closeLoadingScreen();
-
         startGame();
     }
 }, 100);
-
 
 async function startGame() {
     const {
@@ -49,15 +47,21 @@ async function startGame() {
 
     let isPaused = true;
     let isGameOver = false;
-       
+
+    // Set initial movement speed (interval in milliseconds)
+    let movementSpeed = 350;  // Initial speed
+
     var movement = setInterval(function () {
         if (!isPaused) render();
         if (isGameOver) clearInterval(movement);
-    }, 350);
+    }, movementSpeed);
 
     createTileMap();
     placeRocks();
     placeFood();
+    
+    // Collecting all rocks from the tileMap
+    const rocks = Object.values(tileMap).filter(tile => tile.object === "rock");
 
     loadGrassTexture(gl, () => {
         render(); // or any other function to run after texture is ready
@@ -66,7 +70,7 @@ async function startGame() {
     loadSnakeTexture(gl, () => {
         render(); // or any other function to run after texture is ready
     }, 5);
-        
+
     document.addEventListener('keydown', (e) => {
         if (e.key === 'a') {
             facingAngle -= Math.PI / 2;
@@ -81,7 +85,6 @@ async function startGame() {
     function render() { 
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         gl.useProgram(shaderProgram);
-
 
         // Ensure angle is snapped to 90 deg
         facingAngle = Math.round(facingAngle / (Math.PI / 2)) * (Math.PI / 2);
@@ -133,14 +136,63 @@ async function startGame() {
             uUseTexture, uSampler, uLightDirection, uForceLight,
             projMatrix, viewMatrix,
             snake,
-            vertices, verticesHead, normalsHead, texturesHead
+            vertices, verticesHead, normalsHead, texturesHead,
+            facingAngle // <- Pass the facingAngle to drawSnake
         );
         drawGrassTiles(gl, aPosition, aNormal, aTexCoord, uModelMatrix, uUseTexture, uTexture);
         drawRocks(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture, uForceLight, uLightDirection);
-        drawFood(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture, uForceLight, uLightDirection)
+        drawFood(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture, uForceLight, uLightDirection);
+        
+        // Check for collisions with the snake itself
+        for (let i = 1; i < snake.length; i++) {
+            if (snake[0].x == snake[i].x && snake[0].y == snake[i].y) {
+                isGameOver = true;
+                alert("Game Over! You hit yourself.");
+                return;
+            }
+        }
+        
+        // ============================= COLLISION DETECTION ============================= //
+
+        // Check for collisions with rocks
+        for (let i = 0; i < rocks.length; i++) {
+            if (snake[0].x == rocks[i].x && snake[0].y == rocks[i].z) {
+                isGameOver = true;
+                alert("Game Over! You hit a rock.");
+                return;
+            }
+        }
+
+        // Check for collisions with the restricted area
+        if (snake[0].x < -20 || snake[0].x > 20 ||
+            snake[0].y < -20 || snake[0].y > 20) {
+            isGameOver = true;
+            alert("Game Over! You hit the wall.");
+            return;
+        }
+
+        if (snake[0].x == food.x && snake[0].y == food.z) {
+            // Remove food from the map
+            food.x = -1; // Set to an invalid position
+            food.z = -1; // Set to an invalid position
+
+            // Add a new segment to the snake
+            const newSegment = { x: snake[snake.length - 1].x, y: snake[snake.length - 1].y };
+            snake.push(newSegment);
+
+            // Place new food on the map
+            placeFood();
+
+            // Speed up the game (decrease the movement speed)
+            movementSpeed = Math.max(100, movementSpeed - 25);  // Make sure the speed does not go below 100ms
+            clearInterval(movement);
+            movement = setInterval(function () {
+                if (!isPaused) render();
+                if (isGameOver) clearInterval(movement);
+            }, movementSpeed);
+        }
 
         gl.uniform1f(uForceLight, 0.0); 
     }
 
 }
-
