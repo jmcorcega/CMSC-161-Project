@@ -1,3 +1,5 @@
+import { createTileMap, loadGrassTexture, drawGrassTiles, tileMap, placeRocks, drawRocks } from './tilemap.js';
+import { initWebGL } from './init_webgl.js';  // Import the initWebGL function
 
 showLoadingScreen();
 loadPage('pages/title-screen.html');
@@ -14,122 +16,24 @@ var interval = setInterval(function () {
     }
 }, 100);
 
-function startGame() {
-    const canvas = document.getElementById('gameCanvas');
-    const gl = canvas.getContext('webgl');
 
-    if (!gl) {
-        alert('WebGL not supported');
-        return;
-    }
+async function startGame() {
+    const {
+        canvas, gl, shaderProgram,
+        aPosition, aNormal,
+        uModelMatrix, uViewMatrix, uProjMatrix,
+        uLightDirection, uColor, uForceLight,
+        aTexCoord, uUseTexture, uTexture,
+        positionBuffer, normalBuffer, vertices
+    } = await initWebGL();
 
-    // Enable depth and set clear color (sky will be out of view)
-    gl.enable(gl.DEPTH_TEST);
-    gl.clearColor(0.6, 0.9, 0.6, 1); // ground green
-
-    const vertexShaderSource = `
-        attribute vec4 aPosition;
-        attribute vec3 aNormal;
-
-        uniform mat4 uModelMatrix;
-        uniform mat4 uViewMatrix;
-        uniform mat4 uProjMatrix;
-        uniform vec3 uLightDirection;
-
-        varying float vLight;
-
-        attribute vec2 aTexCoord;
-        varying vec2 vTexCoord;
-
-        void main() {
-            vec3 normal = mat3(uModelMatrix) * aNormal;
-
-            float ambient = 0.3;
-            float diffuse = max(dot(normal, normalize(uLightDirection)), 0.0);
-            vLight = ambient + diffuse;
-
-            gl_Position = uProjMatrix * uViewMatrix * uModelMatrix * aPosition;
-            vTexCoord = aTexCoord;
-        }
-    `;
-
-    const fragmentShaderSource = `
-        precision mediump float;
-        uniform vec3 uColor;
-        uniform float uForceLight; // override lighting
-        varying float vLight;
-        uniform sampler2D uSampler;
-        uniform float uUseTexture; // 1.0 to use texture, 0.0 to use color
-        varying vec2 vTexCoord;
-
-        void main() {
-            float light = mix(vLight, 1.0, uForceLight);
-            vec4 texColor = texture2D(uSampler, vTexCoord);
-
-            vec3 finalColor = mix(uColor, texColor.rgb, uUseTexture);
-            float finalAlpha = mix(1.0, texColor.a, uUseTexture);
-
-            gl_FragColor = vec4(finalColor * light, finalAlpha);
-        }
-    `;
-
-    const shaderProgram = initShaderProgram(gl, vertexShaderSource, fragmentShaderSource);
-    const aPosition = gl.getAttribLocation(shaderProgram, 'aPosition');
-    const aNormal = gl.getAttribLocation(shaderProgram, 'aNormal');
-    const aTexCoord = gl.getAttribLocation(shaderProgram, 'aTexCoord');
-    const uModelMatrix = gl.getUniformLocation(shaderProgram, 'uModelMatrix');
-    const uViewMatrix = gl.getUniformLocation(shaderProgram, 'uViewMatrix');
-    const uProjMatrix = gl.getUniformLocation(shaderProgram, 'uProjMatrix');
-    const uUseTexture = gl.getUniformLocation(shaderProgram, 'uUseTexture');
-    const uLightDirection = gl.getUniformLocation(shaderProgram, 'uLightDirection');
-    const uColor = gl.getUniformLocation(shaderProgram, 'uColor');
-    const uForceLight = gl.getUniformLocation(shaderProgram, 'uForceLight');
-
-    const { vertices, normals, textures } = createCube();
-
-    // initialize texture
-    const texture = gl.createTexture();
-    const image = new Image();
-    image.src = './img/skins/skin-1.png';
-    image.onload = function () {
-        gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-        gl.bindTexture(gl.TEXTURE_2D, texture);
-
-        // Upload image
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-
-        // NPOT-safe settings
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    };
-
-    const positionBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-
-    const normalBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
-
-    const texCoordBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textures), gl.STATIC_DRAW);
-
-    // Create grid buffer
-    const gridLines = createGridLines();
-    const gridBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, gridBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, gridLines, gl.STATIC_DRAW);
-
-    // Snake with 4 segments (head + 3 body)
+    // Snake with cube segments 
     const snake = [
         { x: 0.5, y: 0.5 },    // head
-        { x: -0.5, y: 0.5 },   // body 1
-        { x: -1.5, y: 0.5 },   // body 2
-        { x: -2.5, y: 0.5 },   // body 3
+        { x: -0.5, y: 0.5 },   // body 
+        { x: -1.5, y: 0.5 },   
+        { x: -2.5, y: 0.5 },   
+        { x: -3.5, y: 0.5 },   
     ];
 
     let positionTrail = [];  // for movement history
@@ -143,7 +47,19 @@ function startGame() {
 
     let isPaused = true;
     let isGameOver = false;
+       
+    var movement = setInterval(function () {
+        if (!isPaused) render();
+        if (isGameOver) clearInterval(movement);
+    }, 350);
 
+    createTileMap();
+    placeRocks();
+
+    loadGrassTexture(gl, () => {
+        render(); // or any other function to run after texture is ready
+    });
+        
     document.addEventListener('keydown', (e) => {
         if (e.key === 'a') {
             facingAngle -= Math.PI / 2;
@@ -151,20 +67,15 @@ function startGame() {
         } else if (e.key === 'd') {
             facingAngle += Math.PI / 2;
             targetAngle += Math.PI / 2;
-        }
-    
+        }        
         isPaused = false;
     });
-       
-    var movement = setInterval(function () {
-        if (!isPaused) render();
-        if (isGameOver) clearInterval(movement);
-    }, 350);
 
-    function render() {
+    function render() { 
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         gl.useProgram(shaderProgram);
-    
+
+
         // Ensure angle is snapped to 90 deg
         facingAngle = Math.round(facingAngle / (Math.PI / 2)) * (Math.PI / 2);
     
@@ -243,27 +154,22 @@ function startGame() {
             gl.uniformMatrix4fv(uModelMatrix, false, modelMatrix);
             gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 3);
         }
-    
-        // Draw grid with white color (ensure lighting and texture are disabled)
-        gl.uniform3fv(uColor, [1.0, 1.0, 1.0]); // Set white color for the grid
-        gl.uniform1f(uForceLight, 0.0); // Disable lighting for the grid
-        gl.uniform1f(uUseTexture, 0.0); // Ensure texture is not applied
 
-        // Apply identity matrix (no transformation) for grid
-        gl.uniformMatrix4fv(uModelMatrix, false, identity());
+        drawGrassTiles(gl, aPosition, aNormal, aTexCoord, uModelMatrix, uUseTexture, uTexture);
+        drawRocks(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture);
 
-        // Bind the grid buffer and render the grid lines
-        gl.bindBuffer(gl.ARRAY_BUFFER, gridBuffer);
-        gl.vertexAttribPointer(aPosition, 3, gl.FLOAT, false, 0, 0);
-        gl.enableVertexAttribArray(aPosition);
+        // // Draw grid
+        // gl.uniform3fv(uColor, [1.0, 1.0, 1.0]);
+        // gl.uniform1f(uForceLight, 0.9); 
+        // gl.uniformMatrix4fv(uModelMatrix, false, identity());
+        // gl.bindBuffer(gl.ARRAY_BUFFER, gridBuffer);
+        // gl.vertexAttribPointer(aPosition, 3, gl.FLOAT, false, 0, 0);
+        // gl.enableVertexAttribArray(aPosition);
+        // gl.disableVertexAttribArray(aNormal); // grid has no normals
+        // gl.drawArrays(gl.LINES, 0, gridLines.length / 3);
 
-        // Disable normal attribute (no normals for grid)
-        gl.disableVertexAttribArray(aNormal);
-
-        // Draw the grid
-        gl.drawArrays(gl.LINES, 0, gridLines.length / 3);
+        gl.uniform1f(uForceLight, 0.0); 
     }
 
-    render();
 }
 
