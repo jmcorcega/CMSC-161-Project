@@ -47,7 +47,7 @@ export async function initWebGL() {
         textures: texturesHead
     } = createSnakeHeadWithFeatures();
 
-    const { vertices, normals, textures } = createSnakeBody(0.3);
+    const { vertices, normals, textures } = createSnakeBody(0.3, 1);
     const positionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);

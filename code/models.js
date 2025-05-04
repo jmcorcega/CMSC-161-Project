@@ -119,7 +119,7 @@ export function createGrassGeometry(bladeCount = Math.floor(Math.random() * 4) +
 
     for (let i = 0; i < bladeCount; i++) {
         // const height = Math.random() * 0.3 + 0.2;
-        const height = Math.random() * 0.5;
+        const height = Math.random() * 0.5 + 0.2;
         const width = 0.05;
         const curveAmount = 0.1;
         const segments = 3;
@@ -175,7 +175,7 @@ export function createGrassGeometry(bladeCount = Math.floor(Math.random() * 4) +
 }
 
 export function createPlantGeometry() {
-    const stemHeight = 0.7;
+    const stemHeight = 0.8;
     const stemWidth = 0.04;
 
     const stemVertices = [];
@@ -198,7 +198,7 @@ export function createPlantGeometry() {
     const leaves = [];
     const leafNormals = [];
 
-    const leafCount = Math.random() * 3 + 1;
+    const leafCount = Math.random() * 3 + 2;
     const leafWidth = 0.25;
     const leafHeight = 0.15;
 
@@ -338,54 +338,217 @@ export function createSnakeBody(height) {
     return { vertices: finalVerts, normals: finalNormals, textures: finalTexCoords };
 }
 
-export function createSnakeHeadWithFeatures() {
-    const head = createSnakeBody(0.5);
+function createEye(radius, latBands, longBands, height, center) {
+    const vertices = [];
+    const normals = [];
+    const uvs = [];
 
-    const eyeRadius = 0.07;
-    const eyeDepth = 0.51; // just outside front face
-    const eyeY = 0.2;
-    const eyeXOffset = 0.2;
+    // Iterate over the latitude and longitude bands to create vertices
+    for (let lat = 0; lat <= latBands; ++lat) {
+        const theta = lat * Math.PI / latBands; // latitude angle
+        const sinTheta = Math.sin(theta);
+        const cosTheta = Math.cos(theta);
 
-    // Eyes: two small quads (could be replaced by textured spheres for realism)
-    const eyes = [
-        // Left eye
-        -eyeXOffset - eyeRadius, eyeY - eyeRadius, eyeDepth,
-        -eyeXOffset + eyeRadius, eyeY - eyeRadius, eyeDepth,
-        -eyeXOffset + eyeRadius, eyeY + eyeRadius, eyeDepth,
-        -eyeXOffset - eyeRadius, eyeY + eyeRadius, eyeDepth,
+        for (let lon = 0; lon <= longBands; ++lon) {
+            const phi = lon * 2 * Math.PI / longBands; // longitude angle
+            const sinPhi = Math.sin(phi);
+            const cosPhi = Math.cos(phi);
 
-        // Right eye
-         eyeXOffset - eyeRadius, eyeY - eyeRadius, eyeDepth,
-         eyeXOffset + eyeRadius, eyeY - eyeRadius, eyeDepth,
-         eyeXOffset + eyeRadius, eyeY + eyeRadius, eyeDepth,
-         eyeXOffset - eyeRadius, eyeY + eyeRadius, eyeDepth,
-    ];
+            // Apply radius for the spherical part, and stretch along the Y axis
+            const x = radius * cosPhi * sinTheta;
+            const y = height * (cosTheta - 0.5); // Elongate along Y-axis, shift to center
+            const z = radius * sinPhi * sinTheta;
 
-    const eyeNormals = new Array(6 * 3).fill(0).map((_, i) => (i % 3 === 2 ? 1 : 0)); // z normal
-    
-    // Modify UVs to make eyes white (no texture)
-    const eyeUVs = [
-        0, 0, 1, 0, 1, 1, 0, 1, // Left eye
-        0, 0, 1, 0, 1, 1, 0, 1, // Right eye
-    ];
-
-    const eyeIndices = [
-        0, 1, 2, 0, 2, 3,  // left eye
-        4, 5, 6, 4, 6, 7   // right eye
-    ];
-
-    const finalEyes = [], finalEyeNormals = [], finalEyeUVs = [];
-    for (let i = 0; i < eyeIndices.length; i++) {
-        let vi = eyeIndices[i];
-        finalEyes.push(eyes[vi * 3], eyes[vi * 3 + 1], eyes[vi * 3 + 2]);
-        finalEyeNormals.push(0, 0, 1);
-        finalEyeUVs.push(eyeUVs[vi * 2], eyeUVs[vi * 2 + 1]);
+            // Add vertex with adjustment for center
+            vertices.push(center[0] + x, center[1] + y, center[2] + z);
+            normals.push(x, y, z); // Normal for lighting
+            uvs.push(lon / longBands, lat / latBands); // UV mapping for texture
+        }
     }
 
-    // Combine all except for tongue
+    // Create indices for triangles that form the surface of the capsule
+    const indices = [];
+    for (let lat = 0; lat < latBands; ++lat) {
+        for (let lon = 0; lon < longBands; ++lon) {
+            const first = (lat * (longBands + 1)) + lon;
+            const second = first + longBands + 1;
+
+            indices.push(first, second, first + 1);
+            indices.push(second, second + 1, first + 1);
+        }
+    }
+
+    // Organize final vertices, normals, and UVs using the indices
+    const finalVertices = [], finalNormals = [], finalUVs = [];
+    for (let i = 0; i < indices.length; i++) {
+        const vi = indices[i];
+        finalVertices.push(vertices[vi * 3], vertices[vi * 3 + 1], vertices[vi * 3 + 2]);
+        finalNormals.push(normals[vi * 3], normals[vi * 3 + 1], normals[vi * 3 + 2]);
+        finalUVs.push(uvs[vi * 2], uvs[vi * 2 + 1]);
+    }
+
     return {
-        vertices: [...head.vertices, ...finalEyes],
-        normals: [...head.normals, ...finalEyeNormals],
-        textures: [...head.textures, ...finalEyeUVs],  // Assuming default white texture for eyes
+        vertices: finalVertices,
+        normals: finalNormals,
+        textures: finalUVs
     };
 }
+
+
+export function createTruckHead(height) {
+    // Define the vertices for a trapezoidal head shape (like a truck front)
+    const v = [
+        // Side face
+        -0.6, -height,  0.5,  // front left
+         1, -height,  0.5,  // front right
+         0,  height,  0.5,  // front top right
+        -0.6,  height,  0.5,  // front top left
+
+        // Side face 
+        -0.6, -height, -0.5,  // back left
+         1, -height, -0.5,  // back right
+         0,  height, -0.5,  // back top right
+        -0.6,  height, -0.5,  // back top left
+
+        // Top face
+        -0.6,  height,  0.5,  // front top left
+         0,  height,  0.5,  // front top right
+         0,  height, -0.5,  // back top right
+        -0.6,  height, -0.5,  // back top left
+
+        // Bottom face
+        -0.6, -height,  0.5,  // front left
+         1, -height,  0.5,  // front right
+         1, -height, -0.5,  // back right
+        -0.6, -height, -0.5,  // back left
+
+        // front face
+         1, -height,  0.5,  // front right
+         1, -height, -0.5,  // back right
+         0,  height, -0.5,  // back top right
+         0,  height,  0.5,  // front top right
+
+        // Back face
+        -0.6, -height,  0.5,  // front left
+        -0.6, -height, -0.5,  // back left
+        -0.6,  height, -0.5,  // back top left
+        -0.6,  height,  0.5,  // front top left
+    ];
+
+    // Define the normals for each face
+    const n = [
+        // Front face
+        0, 0, 1,  0, 0, 1,  0, 0, 1,  0, 0, 1,
+        // Back face
+        0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1,
+        // Top face
+        0, 1, 0,  0, 1, 0,  0, 1, 0,  0, 1, 0,
+        // Bottom face
+        0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0,
+        // Right face
+        1, 0, 0,  1, 0, 0,  1, 0, 0,  1, 0, 0,
+        // Left face
+        -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0,
+    ];
+
+    // Texture coordinates (using the same texture for simplicity)
+    const t = [
+        // Front face
+        0, 0, 1, 0, 1, 1, 0, 1,
+        // Back face
+        0, 0, 1, 0, 1, 1, 0, 1,
+        // Top face
+        0, 0, 1, 0, 1, 1, 0, 1,
+        // Bottom face
+        0, 0, 1, 0, 1, 1, 0, 1,
+        // Right face
+        0, 0, 1, 0, 1, 1, 0, 1,
+        // Left face
+        0, 0, 1, 0, 1, 1, 0, 1,
+    ];
+
+    // Indices to triangles (optional — using drawArrays with ordered vertices)
+    const orderedVerts = [
+        0, 1, 2, 0, 2, 3,       // front
+        4, 5, 6, 4, 6, 7,       // back
+        8, 9,10, 8,10,11,       // top
+       12,13,14,12,14,15,       // bottom
+       16,17,18,16,18,19,       // right
+       20,21,22,20,22,23        // left
+    ];
+
+    // Final arrays to hold the vertices, normals, and texture coordinates
+    const finalVerts = [];
+    const finalNormals = [];
+    const finalTexCoords = [];
+    for (let i = 0; i < orderedVerts.length; i++) {
+        let vi = orderedVerts[i];
+        finalVerts.push(v[vi * 3], v[vi * 3 + 1], v[vi * 3 + 2]);
+        finalNormals.push(n[vi * 3], n[vi * 3 + 1], n[vi * 3 + 2]);
+        finalTexCoords.push(t[vi * 2], t[vi * 2 + 1]);
+    }
+
+    return { vertices: finalVerts, normals: finalNormals, textures: finalTexCoords };
+}
+
+export function createSnakeHeadWithFeatures() {
+    const head = createTruckHead(0.5);  // Replace with truck head
+
+    // Create eyes as spheres above the head
+    const leftEye = createEye(0.2, 6, 6, 0.3, [0.1, 0.6, -0.3]);
+    const rightEye = createEye(0.2, 6, 6, 0.3, [0.1, 0.6, 0.3]);
+
+    return {
+        vertices: [...head.vertices, ...leftEye.vertices, ...rightEye.vertices],
+        normals: [...head.normals, ...leftEye.normals, ...rightEye.normals],
+        textures: [...head.textures, ...leftEye.textures, ...rightEye.textures],
+    };
+}
+
+export function createApple(segments = 12, rings = 12) {
+    const vertices = [];
+    const normals = [];
+    const indices = [];
+
+    for (let y = 0; y <= rings; y++) {
+        const v = y / rings;
+        const theta = v * Math.PI;
+        const sinTheta = Math.sin(theta);
+        const cosTheta = Math.cos(theta);
+
+        for (let x = 0; x <= segments; x++) {
+            const u = x / segments;
+            const phi = u * 2 * Math.PI;
+            const sinPhi = Math.sin(phi);
+            const cosPhi = Math.cos(phi);
+
+            // Base radius
+            let r = sinTheta;
+
+            // Apple-like deformation
+            r *= 1.0 + 0.2 * Math.pow(sinTheta, 2) * cosPhi; // bulge sides
+            const yOffset = cosTheta * (1.0 + 0.1 * sinTheta * sinPhi); // slightly flattened top and bottom
+
+            const px = r * cosPhi;
+            const py = yOffset;
+            const pz = r * sinPhi;
+
+            vertices.push(px, py, pz);
+            normals.push(px, py, pz); // approximate normal (normalize later if needed)
+        }
+    }
+
+    // Indices
+    for (let y = 0; y < rings; y++) {
+        for (let x = 0; x < segments; x++) {
+            const i1 = y * (segments + 1) + x;
+            const i2 = i1 + segments + 1;
+
+            indices.push(i1, i2, i1 + 1);
+            indices.push(i1 + 1, i2, i2 + 1);
+        }
+    }
+
+    return { vertices, normals, indices };
+}
+
