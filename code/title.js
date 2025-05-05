@@ -1,3 +1,14 @@
+import { loadPage } from '../lib/page_helper.js';
+
+import Screen from './screen.js';
+import AudioService from '../lib/audio_service.js';
+
+import AboutScreen from './about.js';
+import LeaderboardScreen from './leaderboards.js';
+import GameScreen from './game.js';
+
+const audioService = new AudioService();
+const aboutScreen = new AboutScreen();
 
 function renderSoundIcons() {
     const titleBtnMusic = document.getElementById('title-btn-music');
@@ -7,7 +18,7 @@ function renderSoundIcons() {
         return;
     }
 
-    if (getBgmState()) {
+    if (audioService.getBgmState()) {
         titleBtnMusic.classList.add("game-button-enabled");
         titleBtnMusic.innerHTML = '<img src="img/icons/musicOn.png">';
     } else {
@@ -15,7 +26,7 @@ function renderSoundIcons() {
         titleBtnMusic.innerHTML = '<img src="img/icons/musicOff.png">';
     }
 
-    if (getSfxState()) {
+    if (audioService.getSfxState()) {
         titleBtnSound.classList.add("game-button-enabled");
         titleBtnSound.innerHTML = '<img src="img/icons/audioOn.png">';
     } else {
@@ -45,65 +56,59 @@ function showLeaderboardsScreen() {
 }
 
 function showAboutScreen() {
-    showLoadingScreen();
-
-    setTimeout(function () {
-        loadPage('pages/about-screen.html', function() {
-            onShowAbout();
-        });
-    }, 1000);
-
-    var progress = 0;
-    var interval = setInterval(function () {
-        progress += 10;
-        setLoadingProgress(progress);
-        if (progress >= 100) {
-            clearInterval(interval);
-            closeLoadingScreen();
-        }
-    }, 100);
+    aboutScreen.loadScreen();
 }
 
 const onSoundBtnClick = function (e) {
-    let oldState = getSfxState();
-    setSfxState(!oldState);
-    playSfx("select");
+    let oldState = audioService.getSfxState();
+    audioService.setSfxState(!oldState);
+    audioService.playSfx("select");
     renderSoundIcons();
 }
 
 const onMusicBtnClick = function (e) {
-    let oldState = getBgmState();
-    playSfx("select");
-    setBgmState(!oldState);
+    let oldState = audioService.getBgmState();
+    audioService.playSfx("select");
+    audioService.setBgmState(!oldState);
 
-    if (getBgmState()) {
-        playBgm(true);
+    if (audioService.getBgmState()) {
+        audioService.playBgm(true);
     } else {
-        stopBgm();
+        audioService.stopBgm();
     }
 
     renderSoundIcons();
 }
 
-function onShowTitle() {
-    const titleBtnMusic = document.getElementById('title-btn-music');
-    const titleBtnSound = document.getElementById('title-btn-sound');
-    const titleBtnLeaderboards = document.getElementById('title-btn-leaderboards');
-    const titleBtnAbout = document.getElementById('title-btn-about');
-
-    renderSoundIcons();
-
-    if (titleBtnMusic != null && titleBtnSound != null) {
-        titleBtnMusic.addEventListener("click", onMusicBtnClick);
-        titleBtnSound.addEventListener("click", onSoundBtnClick);
+export default class TitleScreen extends Screen {
+    constructor() {
+        super("pages/title-screen.html");
     }
 
-    if (titleBtnLeaderboards != null) {
-        titleBtnLeaderboards.addEventListener("click", showLeaderboardsScreen);
-    }
+    onShow() {
+        const titleBtnMusic = document.getElementById('title-btn-music');
+        const titleBtnSound = document.getElementById('title-btn-sound');
+        const titleBtnLeaderboards = document.getElementById('title-btn-leaderboards');
+        const titleBtnAbout = document.getElementById('title-btn-about');
+        const titleBtnPlay = document.getElementById('title-btn-play');
 
-    if (titleBtnAbout != null) {
-        titleBtnAbout.addEventListener("click", showAboutScreen);
+        renderSoundIcons();
+
+        if (titleBtnMusic != null && titleBtnSound != null) {
+            titleBtnMusic.addEventListener("click", onMusicBtnClick);
+            titleBtnSound.addEventListener("click", onSoundBtnClick);
+        }
+
+        if (titleBtnLeaderboards != null) {
+            titleBtnLeaderboards.addEventListener("click", () => new LeaderboardScreen().loadScreen());
+        }
+
+        if (titleBtnAbout != null) {
+            titleBtnAbout.addEventListener("click", () => aboutScreen.loadScreen());
+        }
+
+        if (titleBtnPlay != null) {
+            titleBtnPlay.addEventListener("click", () => new GameScreen().loadScreen());
+        }
     }
 }
-

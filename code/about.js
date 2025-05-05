@@ -1,16 +1,18 @@
+import { loadPage } from '../lib/page_helper.js';
+import Screen from './screen.js';
 
+import TitleScreen from './title.js';
 function goToTitleScreen() {
-    showLoadingScreen();
-    
-    var delay = setInterval(function () {
-        loadPage('pages/title-screen.html', function() {
-            closeLoadingScreen();
-            onShowTitle();
-        });
-        clearInterval(delay);
-    }, 1000);
+    const titleScreen = new TitleScreen();
+    titleScreen.loadScreen();
 }
 
-function onShowAbout() {
-    onHeaderLoad(goToTitleScreen);
+export default class AboutScreen extends Screen {
+    constructor() {
+        super("pages/about-screen.html");
+    }
+
+    onShow() {
+        this.onHeaderLoad(goToTitleScreen);
+    }
 }

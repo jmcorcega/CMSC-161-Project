@@ -1,25 +1,23 @@
-import { onShowGame } from "./game.js";
-import { playBgm, preloadBgm, preloadSfx } from "../lib/audio_service.js";
+import AudioService from "../lib/audio_service.js";
+import TitleScreen from "./title.js";
+import { loadPage } from '../lib/page_helper.js';
+
+const audioService = new AudioService();
+const titleScreen = new TitleScreen();
 
 function preloadBgMusic() {
-    preloadBgm('bgm/title.mp3');
+    audioService.preloadBgm('bgm/title.mp3');
 }
 
 function preloadSoundEffects() {
     let sfx = [
         { key: 'select', asset: 'sfx/select.ogg' },
+        { key: 'dialog', asset: 'sfx/dialog.ogg' },
     ]
 
     sfx.forEach((sfx) => {
-        preloadSfx(sfx.key, sfx.asset);
+        audioService.preloadSfx(sfx.key, sfx.asset);
     });
-}
-
-function onHeaderLoad(fn) {
-    const backBtn = document.getElementById('header-btn-back');
-    if (backBtn != null && fn != null) {
-        backBtn.addEventListener('click', fn);
-    }
 }
 
 // Preload images and icons in memory.
@@ -35,7 +33,7 @@ function onStartGame() {
     
     var delay = setInterval(function () {
         loadPage('pages/title-screen.html', function() {
-            onShowTitle();
+            titleScreen.onShow();
         });
         // loadPage('pages/snake-game.html', function() {
         // });
@@ -57,7 +55,7 @@ function onStartGame() {
         if (progress >= 100) {
             clearInterval(interval);
             closeLoadingScreen();
-            playBgm(true);
+            audioService.playBgm(true);
             // onShowGame();
         }
     }, 200);

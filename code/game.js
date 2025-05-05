@@ -2,19 +2,33 @@ import { createTileMap, loadGrassTexture, tileMap, placeRocksAndGrass, placeLogs
     drawTiles, drawRocks, drawLogs, drawGrasses, drawFood, placeFood, food } from './tilemap.js';
 import { initWebGL } from './init_webgl.js';  // Import the initWebGL function
 import { drawSnake, loadSnakeTexture } from './snake-map.js';
+import { registerKeyListener } from '../lib/key_listener.js';
+
+import Screen from './screen.js';
+
+import DialogController from '../lib/dialog.js';
+const dialogController = new DialogController();
+
+let isPaused = false;
+let isGameOver = false;
 
 function showPauseMenu() {
-    showDialog(2);
+    dialogController.showDialog(2);
 }
 
 function closePauseMenu() {
-    closeDialog(2);
+    dialogController.closeDialog(2);
 }
 
 function onResumeGame() {
     console.log('onResumeGame');
     closePauseMenu();
-    // Add logic to resume the game
+
+    // Wait a bit before resuming the game
+    // This is to prevent the game from resuming immediately
+    setTimeout(() => {
+        isPaused = false;
+    }, 1000);
 }
 
 function onRestartGame() {
@@ -129,9 +143,6 @@ async function startGame() {
     let targetAngle = 0;
     let cameraAngle = 0;
 
-    let isPaused = true;
-    let isGameOver = false;
-
     // Set initial movement speed (interval in milliseconds)
     // let movementSpeed = 350;  // Initial speed
 
@@ -146,7 +157,6 @@ async function startGame() {
 
     var movement = setInterval(function () {
         if (!isPaused) render();
-        if (isGameOver) clearInterval(movement);
     }, frameRate);
 
     createTileMap();
@@ -166,16 +176,24 @@ async function startGame() {
         render(); // or any other function to run after texture is ready
     }, 5);
 
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'a') {
-            facingAngle -= Math.PI / 2;
-            targetAngle -= Math.PI / 2;
-        } else if (e.key === 'd') {
-            facingAngle += Math.PI / 2;
-            targetAngle += Math.PI / 2;
-        }        
+    function onPressLeft(e) {
+        if (isPaused) return;
+
+        facingAngle -= Math.PI / 2;
+        targetAngle -= Math.PI / 2;
         isPaused = false;
-    });
+    }
+    
+    function onPressRight(e) {
+        if (isPaused) return;
+
+        facingAngle += Math.PI / 2;
+        targetAngle += Math.PI / 2;
+        isPaused = false;
+    }
+
+    registerKeyListener('left', 'A', 'keydown', onPressLeft);
+    registerKeyListener('right', 'D', 'keydown', onPressRight);
 
     function render() { 
         const currentTime = Date.now();
@@ -276,6 +294,7 @@ async function startGame() {
         for (let i = 1; i < snake.length; i++) {
             if (snake[0].x == snake[i].x && snake[0].y == snake[i].y) {
                 isGameOver = true;
+                clearInterval(movement);
                 alert("Game Over! You hit yourself.");
                 return;
             }
@@ -287,6 +306,7 @@ async function startGame() {
         for (let i = 0; i < logs.length; i++) {
             if (snake[0].x == logs[i].x && snake[0].y == logs[i].z) {
                 isGameOver = true;
+                clearInterval(movement);
                 alert("Game Over! You hit a log.");
                 return;
             }
@@ -296,6 +316,7 @@ async function startGame() {
         for (let i = 0; i < rocks.length; i++) {
             if (snake[0].x == rocks[i].x && snake[0].y == rocks[i].z) {
                 isGameOver = true;
+                clearInterval(movement);
                 alert("Game Over! You hit a rock.");
                 return;
             }
@@ -305,6 +326,7 @@ async function startGame() {
         if (snake[0].x < -20 || snake[0].x > 20 ||
             snake[0].y < -20 || snake[0].y > 20) {
             isGameOver = true;
+            clearInterval(movement);
             alert("Game Over! You hit the wall.");
             return;
         }
@@ -338,20 +360,28 @@ async function startGame() {
 
 }
 
-function onShowGame() {
-    var btnPause = document.getElementById('header-btn-pause');
-
-    console.log('onShowGame');
-
-    if (btnPause != null) {
-        btnPause.addEventListener('click', function () {
-            showPauseMenu();
-        });
-    } else {
-        console.error('Error: btnPause is null');
+export default class GameScreen extends Screen {
+    constructor() {
+        super("pages/snake-game.html");
     }
 
-    setPauseDialogButtons(onResumeGame, onRestartGame, onExitGame);
-    startGame();
+    onShow() {
+        var btnPause = document.getElementById('header-btn-pause');
+    
+        console.log('onShowGame');
+    
+        if (btnPause != null) {
+            btnPause.addEventListener('click', function () {
+                isPaused = true;
+                showPauseMenu();
+            });
+        } else {
+            console.error('Error: btnPause is null');
+        }
+    
+        dialogController.setPauseDialogButtons(onResumeGame, onRestartGame, onExitGame);
+        startGame();
+    }
 }
-export {onShowGame}
+
+
