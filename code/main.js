@@ -1,4 +1,5 @@
 import { onShowGame } from "./game.js";
+import { playBgm, preloadBgm, preloadSfx } from "../lib/audio_service.js";
 
 function preloadBgMusic() {
     preloadBgm('bgm/title.mp3');
@@ -33,11 +34,11 @@ function onStartGame() {
     showLoadingScreen();
     
     var delay = setInterval(function () {
-        // loadPage('pages/title-screen.html', function() {
-        //     onShowTitle();
-        // });
-        loadPage('pages/snake-game.html', function() {
+        loadPage('pages/title-screen.html', function() {
+            onShowTitle();
         });
+        // loadPage('pages/snake-game.html', function() {
+        // });
         clearInterval(delay);
     }, 1000);
 
@@ -56,8 +57,8 @@ function onStartGame() {
         if (progress >= 100) {
             clearInterval(interval);
             closeLoadingScreen();
-
-            onShowGame();
+            playBgm(true);
+            // onShowGame();
         }
     }, 200);
 }
