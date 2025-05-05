@@ -133,12 +133,21 @@ async function startGame() {
     let isGameOver = false;
 
     // Set initial movement speed (interval in milliseconds)
-    let movementSpeed = 350;  // Initial speed
+    // let movementSpeed = 350;  // Initial speed
+
+    // New variables to control movement speed
+    let movementSpeed = 150; // Snake moves every 150ms
+    let movementProgress = 0; // Tracks progress of movement (0 to 1)
+    let lastMoveTime = 0;   // Track the last time snake moved
+
+    // Because we want 60 FPS, we need to set the interval to 16.67ms
+    // so that we can have 1000ms / 60 FPS = 16.67ms
+    let frameRate = 16.67;  // Initial speed
 
     var movement = setInterval(function () {
         if (!isPaused) render();
         if (isGameOver) clearInterval(movement);
-    }, movementSpeed);
+    }, frameRate);
 
     createTileMap();
     placeRocksAndGrass();
@@ -169,69 +178,100 @@ async function startGame() {
     });
 
     function render() { 
+        const currentTime = Date.now();
+        const deltaTime = currentTime - lastMoveTime;
+    
+        // Update movement progress
+        movementProgress += deltaTime / movementSpeed;
+    
+        // Should we move the snake?
+        // Check if enough time has passed to move the snake
+        if (movementProgress >= 1) {
+            // Complete the movement and reset progress
+            movementProgress = 0;
+            lastMoveTime = currentTime;
+    
+            // Compute new head position
+            const dx = Math.round(Math.cos(facingAngle));
+            const dy = Math.round(Math.sin(facingAngle));
+            const newX = snake[0].x + dx;
+            const newY = snake[0].y + dy;
+    
+            // Add new head position to trail
+            positionTrail.unshift({ x: newX, y: newY });
+    
+            // Trim trail to the number of segments
+            while (positionTrail.length > snake.length) {
+                positionTrail.pop();
+            }
+    
+            // Move each segment to the corresponding position in the trail
+            for (let i = 0; i < snake.length; i++) {
+                snake[i].x = positionTrail[i].x;
+                snake[i].y = positionTrail[i].y;    
+            }
+        }
+
+        // Interpolate positions for smooth movement - no need to actually
+        // move where our snake is, this is for smooth movement without
+        // collision checks messing us up
+        const interpolatedSnake = snake.map((segment, index) => {
+            if (index === 0) {
+                // Interpolate the head position
+                const dx = Math.round(Math.cos(facingAngle));
+                const dy = Math.round(Math.sin(facingAngle));
+                return {
+                    x: segment.x + dx * movementProgress,
+                    y: segment.y + dy * movementProgress,
+                };
+            } else {
+                // Interpolate based on the trail
+                const prev = positionTrail[index - 1];
+                const curr = positionTrail[index];
+                return {
+                    x: curr.x + (prev.x - curr.x) * movementProgress,
+                    y: curr.y + (prev.y - curr.y) * movementProgress,
+                };
+            }
+        });
+    
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         gl.useProgram(shaderProgram);
-
-        // Ensure angle is snapped to 90 deg
-        facingAngle = Math.round(facingAngle / (Math.PI / 2)) * (Math.PI / 2);
-    
-        // Compute new head position
-        const dx = Math.round(Math.cos(facingAngle));
-        const dy = Math.round(Math.sin(facingAngle));
-        const newX = snake[0].x + dx;
-        const newY = snake[0].y + dy;
-    
-        // Add new head position to trail
-        positionTrail.unshift({ x: newX, y: newY });
-    
-        // Trim trail to the number of segments
-        while (positionTrail.length > snake.length) {
-            positionTrail.pop();
-        }
     
         // Smoothly interpolate cameraAngle toward targetAngle
-        const turnSpeed = 0.95;
+        const turnSpeed = 0.5;
         const angleDiff = targetAngle - cameraAngle;
         cameraAngle += angleDiff * turnSpeed;
     
-        // Round the snake's facing angle (used for movement)
-        facingAngle = Math.round(targetAngle / (Math.PI / 2)) * (Math.PI / 2);
-    
-        // Move each segment to the corresponding position in the trail
-        for (let i = 0; i < snake.length; i++) {
-            snake[i].x = positionTrail[i].x;
-            snake[i].y = positionTrail[i].y;    
-        }
-    
         // Camera follows from above and behind
         const camOffset = 10;
-        const camX = snake[0].x - Math.cos(cameraAngle) * camOffset;
+        const camX = interpolatedSnake[0].x - Math.cos(cameraAngle) * camOffset;
         const camY = 8;
-        const camZ = snake[0].y - Math.sin(cameraAngle) * camOffset;
+        const camZ = interpolatedSnake[0].y - Math.sin(cameraAngle) * camOffset;
     
         const eye = [camX, camY, camZ];
-        const center = [snake[0].x, 0, snake[0].y];
+        const center = [interpolatedSnake[0].x, 0, interpolatedSnake[0].y];
         const up = [0, 1, 0];
     
         const projMatrix = perspective(45, canvas.width / canvas.height, 0.1, 100);
         const viewMatrix = lookAt(eye, center, up);
-
+    
         drawSnake(gl, positionBuffer, normalBuffer, texCoordBuffer,
             aPosition, aNormal, aTexCoord,
             uViewMatrix, uProjMatrix, uModelMatrix,
             uUseTexture, uSampler, uLightDirection, uForceLight,
             projMatrix, viewMatrix,
-            snake,
+            interpolatedSnake, // <-- Pass interpolated positions for smooth movement
             vertices, verticesHead, normalsHead, texturesHead,
-            facingAngle // <- Pass the facingAngle to drawSnake
+            facingAngle  // <- Pass the facingAngle to drawSnake
         );
-        
+    
         drawTiles(gl, aPosition, aNormal, aTexCoord, uModelMatrix, uUseTexture, uTexture);
         drawRocks(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture, uForceLight, uLightDirection);
         drawLogs(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture, uForceLight, uLightDirection);
         drawGrasses(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture, uForceLight, uLightDirection);
         drawFood(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture, uForceLight, uLightDirection);
-        
+    
         // Check for collisions with the snake itself
         for (let i = 1; i < snake.length; i++) {
             if (snake[0].x == snake[i].x && snake[0].y == snake[i].y) {
@@ -290,12 +330,7 @@ async function startGame() {
             score.innerHTML = newScore;
 
             // Speed up the game (decrease the movement speed)
-            movementSpeed = Math.max(100, movementSpeed - 25);  // Make sure the speed does not go below 100ms
-            clearInterval(movement);
-            movement = setInterval(function () {
-                if (!isPaused) render();
-                if (isGameOver) clearInterval(movement);
-            }, movementSpeed);
+            movementSpeed = Math.max(33, movementSpeed - 10);  // Don't go below 33ms
         }
 
         gl.uniform1f(uForceLight, 0.0); 
