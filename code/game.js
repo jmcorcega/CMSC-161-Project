@@ -257,7 +257,7 @@ async function startGame() {
         gl.useProgram(shaderProgram);
     
         // Smoothly interpolate cameraAngle toward targetAngle
-        const turnSpeed = 0.5;
+        const turnSpeed = 0.05;
         const angleDiff = targetAngle - cameraAngle;
         cameraAngle += angleDiff * turnSpeed;
     
