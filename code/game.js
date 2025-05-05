@@ -109,6 +109,8 @@ async function startGame() {
         texCoordBuffer, vertices, verticesHead, 
         normalsHead, texturesHead
     } = await initWebGL();
+    const score = document.getElementById('score');
+    const eaten = document.getElementById('eaten');
 
     // Snake with cube segments 
     const snake = [
@@ -278,6 +280,14 @@ async function startGame() {
 
             // Place new food on the map
             placeFood();
+
+            // Update eaten count
+            let newEaten = parseInt(eaten.innerHTML) + 1;
+            eaten.innerHTML = newEaten;
+
+            // Compute for score - this is kinda unfair, where the more you eat, the less score you get
+            let newScore = parseInt(score.innerHTML) + (100 - (newEaten * 10));
+            score.innerHTML = newScore;
 
             // Speed up the game (decrease the movement speed)
             movementSpeed = Math.max(100, movementSpeed - 25);  // Make sure the speed does not go below 100ms
