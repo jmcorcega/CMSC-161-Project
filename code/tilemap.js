@@ -6,8 +6,16 @@ export const tileMap = {};
 
 export let grassTexture = null;
 
+export function resetTileMap() {
+    for (let key in tileMap) {
+        tileMap[key].occupied = false;
+        tileMap[key].object = null;
+    }
+}
+
 // Called in main.js after GL is initialized
 export function createTileMap() {
+    resetTileMap();
     for (let x = -gridSize; x <= gridSize; x++) {
         for (let z = -gridSize; z <= gridSize; z++) {
             const key = `${x},${z}`;
@@ -102,9 +110,9 @@ export function translate(x, y, z) {
 }
 
 
-const rocks = [];
-const logs = [];
-const grasses = [];
+let rocks = [];
+let logs = [];
+let grasses = [];
 
 let grassGeometry = null;
 let plantGeometry = null;
@@ -113,6 +121,11 @@ export let food = null;
 
 export function placeRocksAndGrass(rockCount = 20, grassCount = Object.keys(tileMap).length / 8) {
     const keys = Object.keys(tileMap);
+
+    // Clear previous objects before redrawing
+    rocks = [];
+    logs = [];
+    grasses = [];
 
     // Compute map boundaries
     let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
@@ -192,6 +205,9 @@ export function placeRocksAndGrass(rockCount = 20, grassCount = Object.keys(tile
 
 export function placeLogs(logGroupCount = 2) {
     const keys = Object.keys(tileMap);
+
+    // Clear previous logs before redrawing
+    logs = [];
     
     // Shuffle tiles
     for (let i = keys.length - 1; i > 0; i--) {
@@ -359,6 +375,9 @@ export function drawGrasses(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTe
 export function placeFood(count = 1) {
     const keys = Object.keys(tileMap);
     let placed = 0;
+
+    // Clear previous food before redrawing
+    food = null;
 
     while (placed < count && keys.length > 0) {
         const index = Math.floor(Math.random() * keys.length);
