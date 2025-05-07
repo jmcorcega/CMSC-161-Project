@@ -60,17 +60,7 @@ function onStartGame() {
     preloadImg('img/icons/audioOff.png');
     preloadImg('img/backgrounds/backgroundColorGrass.png');
 
-    var progress = 0;
-    var interval = setInterval(function () {
-        progress += 10;
-        setLoadingProgress(progress);
-        if (progress >= 100) {
-            clearInterval(interval);
-            closeLoadingScreen();
-            audioService.playBgm(true);
-            // onShowGame();
-        }
-    }, 200);
+    titleScreen.loadScreen();
 }
 
 document.getElementById('game').style.display = 'none';

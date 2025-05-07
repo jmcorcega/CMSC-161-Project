@@ -4,11 +4,13 @@ import Screen from './screen.js';
 
 import AboutScreen from './about.js';
 import LeaderboardScreen from './leaderboards.js';
-import GameScreen from './game.js';
 
 import {
     audioService,
 } from '../lib/classes.js';
+
+import { gameScreen } from './screens.js';
+
 const aboutScreen = new AboutScreen();
 const leaderboardsScreen = new LeaderboardScreen();
 
@@ -38,23 +40,8 @@ function renderSoundIcons() {
 }
 
 function showLeaderboardsScreen() {
-    showLoadingScreen();
-
-    setTimeout(function () {
-        loadPage('pages/leaderboards.html', function() {
-            onShowLeaderboard();
-        });
-    }, 1000);
-
-    var progress = 0;
-    var interval = setInterval(function () {
-        progress += 10;
-        setLoadingProgress(progress);
-        if (progress >= 100) {
-            clearInterval(interval);
-            closeLoadingScreen();
-        }
-    }, 100);
+    audioService.playSfx("maximize");
+    leaderboardsScreen.loadScreen();
 }
 
 function showAboutScreen() {
@@ -94,6 +81,10 @@ export default class TitleScreen extends Screen {
         super("pages/title-screen.html");
     }
 
+    onLoading() {
+        audioService.preloadBgm("bgm/title.mp3");
+    }
+
     onShow() {
         const titleBtnMusic = document.getElementById('title-btn-music');
         const titleBtnSound = document.getElementById('title-btn-sound');
@@ -117,7 +108,9 @@ export default class TitleScreen extends Screen {
         }
 
         if (titleBtnPlay != null) {
-            titleBtnPlay.addEventListener("click", () => new GameScreen().loadScreen());
+            titleBtnPlay.addEventListener("click", () => showGameScreen());
         }
+
+        audioService.playBgm(true);
     }
 }
