@@ -179,6 +179,7 @@ async function startGame() {
     function onPressLeft(e) {
         if (isPaused) return;
 
+        audioService.playSfx("turn");
         facingAngle -= Math.PI / 2;
         targetAngle -= Math.PI / 2;
         isPaused = false;
@@ -187,6 +188,7 @@ async function startGame() {
     function onPressRight(e) {
         if (isPaused) return;
 
+        audioService.playSfx("turn");
         facingAngle += Math.PI / 2;
         targetAngle += Math.PI / 2;
         isPaused = false;
@@ -296,6 +298,7 @@ async function startGame() {
                 isGameOver = true;
                 clearInterval(movement);
                 alert("Game Over! You hit yourself.");
+                audioService.playSfx("collision");
                 return;
             }
         }
@@ -308,6 +311,7 @@ async function startGame() {
                 isGameOver = true;
                 clearInterval(movement);
                 alert("Game Over! You hit a log.");
+                audioService.playSfx("collision");
                 return;
             }
         }
@@ -318,6 +322,7 @@ async function startGame() {
                 isGameOver = true;
                 clearInterval(movement);
                 alert("Game Over! You hit a rock.");
+                audioService.playSfx("collision");
                 return;
             }
         }
@@ -328,10 +333,14 @@ async function startGame() {
             isGameOver = true;
             clearInterval(movement);
             alert("Game Over! You hit the wall.");
+            audioService.playSfx("collision");
             return;
         }
 
         if (snake[0].x == food.x && snake[0].y == food.z) {
+            // Play sound effect
+            audioService.playSfx("food");
+
             // Remove food from the map
             food.x = -1; // Set to an invalid position
             food.z = -1; // Set to an invalid position
