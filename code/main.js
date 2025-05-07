@@ -13,6 +13,16 @@ function preloadSoundEffects() {
     let sfx = [
         { key: 'select', asset: 'sfx/select.ogg' },
         { key: 'dialog', asset: 'sfx/dialog.ogg' },
+        { key: 'lose', asset: 'sfx/levelLose.ogg' },
+        { key: 'close', asset: 'sfx/close.ogg' },
+        { key: 'confirm', asset: 'sfx/confirm.ogg' },
+        { key: 'dialogConfirm', asset: 'sfx/dialogConfirm.ogg' },
+        { key: 'error', asset: 'sfx/error.ogg' },
+        { key: 'maximize', asset: 'sfx/maximize.ogg' },
+        { key: 'minimize', asset: 'sfx/minimize.ogg' },
+        { key: 'turn', asset: 'sfx/turn.ogg' },
+        { key: 'food', asset: 'sfx/food.ogg' },
+        { key: 'collision', asset: 'sfx/collision.ogg' },
     ]
 
     sfx.forEach((sfx) => {
