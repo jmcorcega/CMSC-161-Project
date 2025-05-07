@@ -10,6 +10,7 @@ import {
     audioService,
 } from '../lib/classes.js';
 const aboutScreen = new AboutScreen();
+const leaderboardsScreen = new LeaderboardScreen();
 
 function renderSoundIcons() {
     const titleBtnMusic = document.getElementById('title-btn-music');
@@ -57,7 +58,14 @@ function showLeaderboardsScreen() {
 }
 
 function showAboutScreen() {
+    audioService.playSfx("maximize");
     aboutScreen.loadScreen();
+}
+
+function showGameScreen() {
+    audioService.stopBgm();
+    audioService.playSfx("minimize");
+    gameScreen.loadScreen();
 }
 
 const onSoundBtnClick = function (e) {
@@ -101,11 +109,11 @@ export default class TitleScreen extends Screen {
         }
 
         if (titleBtnLeaderboards != null) {
-            titleBtnLeaderboards.addEventListener("click", () => new LeaderboardScreen().loadScreen());
+            titleBtnLeaderboards.addEventListener("click", () => showLeaderboardsScreen());
         }
 
         if (titleBtnAbout != null) {
-            titleBtnAbout.addEventListener("click", () => aboutScreen.loadScreen());
+            titleBtnAbout.addEventListener("click", () => showAboutScreen());
         }
 
         if (titleBtnPlay != null) {
