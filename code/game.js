@@ -323,8 +323,8 @@ async function startGame() {
         }
 
         // Check for collisions with the restricted area
-        if (snake[0].x < -20 || snake[0].x > 20 ||
-            snake[0].y < -20 || snake[0].y > 20) {
+        if (snake[0].x < -gridSize || snake[0].x > gridSize ||
+            snake[0].y < -gridSize || snake[0].y > gridSize) {
             isGameOver = true;
             clearInterval(movement);
             alert("Game Over! You hit the wall.");
