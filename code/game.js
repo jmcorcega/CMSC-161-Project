@@ -1,16 +1,26 @@
 import { createTileMap, loadGrassTexture, tileMap, placeRocksAndGrass, placeLogs, 
-    drawTiles, drawRocks, drawLogs, drawGrasses, drawFood, placeFood, food } from './tilemap.js';
-import { initWebGL } from './init_webgl.js';  // Import the initWebGL function
+    drawTiles, drawRocks, drawLogs, drawGrasses, drawFood, placeFood, food, gridSize } from './tilemap.js';
+import { initWebGL, destroyWebGL } from './init_webgl.js';  // Import the initWebGL function
 import { drawSnake, loadSnakeTexture } from './snake-map.js';
-import { registerKeyListener } from '../lib/key_listener.js';
+import { registerKeyListener, unregisterKeyListener } from '../lib/key_listener.js';
 
 import Screen from './screen.js';
+import TitleScreen from './title.js';
+
+import {
+    audioService,
+} from '../lib/classes.js';
 
 import DialogController from '../lib/dialog.js';
 const dialogController = new DialogController();
 
 let isPaused = false;
 let isGameOver = false;
+let isGameFinished = false;
+let isWebGLReady = false;
+let endLevelMessage = "";
+let glContext = null;
+let gameLoopInterval = null;
 
 function showPauseMenu() {
     dialogController.showDialog(2);
@@ -20,25 +30,61 @@ function closePauseMenu() {
     dialogController.closeDialog(2);
 }
 
+function onGameOver() {
+    audioService.stopBgm();
+    setTimeout(() => {
+        isGameOver = true;
+        audioService.playSfx("lose");
+        dialogController.setEndLevelMessage(endLevelMessage, "/img/coin_06.png", true, false);
+        dialogController.showDialog(3);
+    }, 3000);
+}
+
 function onResumeGame() {
-    console.log('onResumeGame');
     closePauseMenu();
 
     // Wait a bit before resuming the game
     // This is to prevent the game from resuming immediately
     setTimeout(() => {
         isPaused = false;
+        audioService.playBgm(true);
     }, 1000);
 }
 
 function onRestartGame() {
-    console.log('onRestartGame');
-    // Add logic to restart the game
+    dialogController.closeDialog(2);
+    dialogController.closeDialog(3);
+    __onExitGame();
+
+    audioService.stopBgm();
+    audioService.playSfx("close");
+    new GameScreen().loadScreen();
+}
+
+function __onExitGame() {
+    isGameFinished = true;
+    unregisterKeyListener("left");
+    unregisterKeyListener("right");
+    unregisterKeyListener("escape");
+
+    if (gameLoopInterval) {
+        clearInterval(gameLoopInterval);
+        gameLoopInterval = null;
+    }
+
+    if (glContext != null) {
+        destroyWebGL(glContext);
+        glContext = null;
+    }
 }
 
 function onExitGame() {
-    console.log('onExitGame');
-    // Add logic to exit the game
+    dialogController.closeDialog(2);
+    dialogController.closeDialog(3);
+    __onExitGame();
+    audioService.stopBgm();
+    audioService.playSfx("close");
+    new TitleScreen().loadScreen();
 }
 
 function translate(x, y, z) {
@@ -123,6 +169,7 @@ async function startGame() {
         texCoordBuffer, vertices, verticesHead, 
         normalsHead, texturesHead
     } = await initWebGL();
+    glContext = gl;
     const score = document.getElementById('score');
     const eaten = document.getElementById('eaten');
 
@@ -155,8 +202,20 @@ async function startGame() {
     // so that we can have 1000ms / 60 FPS = 16.67ms
     let frameRate = 16.67;  // Initial speed
 
-    var movement = setInterval(function () {
+    // Clear any existing interval first
+    if (gameLoopInterval) {
+        clearInterval(gameLoopInterval);
+    }
+    
+    gameLoopInterval = setInterval(function () {
         if (!isPaused) render();
+        if (isGameOver) {
+            isGameFinished = true;
+            onGameOver();
+        }
+        if (isGameFinished) {
+            clearInterval(gameLoopInterval);
+        }
     }, frameRate);
 
     createTileMap();
@@ -182,7 +241,6 @@ async function startGame() {
         audioService.playSfx("turn");
         facingAngle -= Math.PI / 2;
         targetAngle -= Math.PI / 2;
-        isPaused = false;
     }
     
     function onPressRight(e) {
@@ -191,11 +249,18 @@ async function startGame() {
         audioService.playSfx("turn");
         facingAngle += Math.PI / 2;
         targetAngle += Math.PI / 2;
-        isPaused = false;
+    }
+
+    function onPressEscape(e) {
+        if (isPaused) return;
+        isPaused = true;
+        audioService.pauseBgm();
+        showPauseMenu();
     }
 
     registerKeyListener('left', 'A', 'keydown', onPressLeft);
     registerKeyListener('right', 'D', 'keydown', onPressRight);
+    registerKeyListener('escape', 'Escape', 'keydown', onPressEscape);
 
     function render() { 
         const currentTime = Date.now();
@@ -296,9 +361,8 @@ async function startGame() {
         for (let i = 1; i < snake.length; i++) {
             if (snake[0].x == snake[i].x && snake[0].y == snake[i].y) {
                 isGameOver = true;
-                clearInterval(movement);
-                alert("Game Over! You hit yourself.");
                 audioService.playSfx("collision");
+                endLevelMessage = "You hit yourself!";
                 return;
             }
         }
@@ -309,9 +373,8 @@ async function startGame() {
         for (let i = 0; i < logs.length; i++) {
             if (snake[0].x == logs[i].x && snake[0].y == logs[i].z) {
                 isGameOver = true;
-                clearInterval(movement);
-                alert("Game Over! You hit a log.");
                 audioService.playSfx("collision");
+                endLevelMessage = "You hit a log!";
                 return;
             }
         }
@@ -320,9 +383,8 @@ async function startGame() {
         for (let i = 0; i < rocks.length; i++) {
             if (snake[0].x == rocks[i].x && snake[0].y == rocks[i].z) {
                 isGameOver = true;
-                clearInterval(movement);
-                alert("Game Over! You hit a rock.");
                 audioService.playSfx("collision");
+                endLevelMessage = "You hit a rock!";
                 return;
             }
         }
@@ -331,9 +393,8 @@ async function startGame() {
         if (snake[0].x < -gridSize || snake[0].x > gridSize ||
             snake[0].y < -gridSize || snake[0].y > gridSize) {
             isGameOver = true;
-            clearInterval(movement);
-            alert("Game Over! You hit the wall.");
             audioService.playSfx("collision");
+            endLevelMessage = "You hit the wall!";
             return;
         }
 
@@ -367,6 +428,8 @@ async function startGame() {
         gl.uniform1f(uForceLight, 0.0); 
     }
 
+    // Render ONCE.
+    render();
 }
 
 export default class GameScreen extends Screen {
@@ -374,22 +437,50 @@ export default class GameScreen extends Screen {
         super("pages/snake-game.html");
     }
 
-    onShow() {
-        var btnPause = document.getElementById('header-btn-pause');
-    
-        console.log('onShowGame');
-    
-        if (btnPause != null) {
-            btnPause.addEventListener('click', function () {
-                isPaused = true;
-                showPauseMenu();
-            });
-        } else {
-            console.error('Error: btnPause is null');
+    reset() {
+        if (gameLoopInterval) {
+            clearInterval(gameLoopInterval);
+            gameLoopInterval = null;
         }
+        
+        isPaused = false;
+        isGameOver = false;
+        isGameFinished = false;
+        isWebGLReady = false;
+        endLevelMessage = "";
+        
+        if (glContext != null) {
+            destroyWebGL(glContext);
+            glContext = null;
+        }
+    }
+
+    onLoading() {
+        audioService.preloadBgm("bgm/game.mp3");
+    }
+
+    onShow() {
+        // Reset first to clean up any previous game state
+        this.reset();
+
+        var btnPause = document.getElementById('header-btn-pause');
+        btnPause.addEventListener('click', function () {
+            isPaused = true;
+            audioService.pauseBgm();
+            showPauseMenu();
+        });
     
         dialogController.setPauseDialogButtons(onResumeGame, onRestartGame, onExitGame);
+        dialogController.setEndLevelDialogButtons(onRestartGame, onExitGame);
+
         startGame();
+        isPaused = true;
+        isGameFinished = false;
+    }
+
+    onAfterShow() {
+        isPaused = false;
+        audioService.playBgm(true);
     }
 }
 

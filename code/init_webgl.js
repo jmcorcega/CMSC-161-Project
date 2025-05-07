@@ -21,6 +21,32 @@ function initShaderProgram(gl, vsSource, fsSource) {
     return program;
 }
 
+export async function destroyWebGL(gl) {
+    // Delete the shader program
+    gl.deleteProgram(gl.shaderProgram);
+
+    // Delete all buffers
+    gl.deleteBuffer(gl.positionBuffer);
+    gl.deleteBuffer(gl.normalBuffer);
+    gl.deleteBuffer(gl.texCoordBuffer);
+    
+    // Reset WebGL state - reduces memory leaks
+    gl.bindTexture(gl.TEXTURE_2D, null);
+    gl.bindBuffer(gl.ARRAY_BUFFER, null);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+    gl.useProgram(null);
+    
+    // Don't remove the canvas, just clear it
+    const canvas = document.getElementById('game-canvas');
+    if (canvas) {
+        const width = canvas.width;
+        const height = canvas.height;
+        canvas.width = width;  // This clears the canvas
+    }
+}
+
 export async function initWebGL() {
     // Initialize WebGL
     const canvas = document.getElementById('game-canvas');
