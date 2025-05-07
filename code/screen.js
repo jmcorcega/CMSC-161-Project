@@ -21,6 +21,14 @@ export default class Screen {
         throw new Error("onShow() must be implemented in the derived class.");
     }
 
+    onAfterShow() {
+        // This method can be overridden by subclasses if needed
+    }
+
+    onLoading() {
+        // This method can be overridden by subclasses if needed
+    }
+
     loadScreen() {
         showLoadingScreen();
         setTimeout(() => {
@@ -29,13 +37,16 @@ export default class Screen {
             });
         }, 1000);
     
-        var progress = 0;
-        var interval = setInterval(function () {
+        this.onLoading();
+        
+        let progress = 0;
+        const interval = setInterval(() => { // Use an arrow function here
             progress += 10;
             setLoadingProgress(progress);
             if (progress >= 100) {
                 clearInterval(interval);
                 closeLoadingScreen();
+                setTimeout(() => this.onAfterShow(), 1000);
             }
         }, 100);
     }
