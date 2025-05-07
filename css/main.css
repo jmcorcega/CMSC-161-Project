@@ -159,18 +159,38 @@ button:active {
     height: 70vh;
 }
 
+#dialog-end-game-subtitle {
+    margin-top: 0.75vh;
+    margin-bottom: 1.5vh;
+    font-size: 1.5rem;
+}
+
 #dialog-save-data {
     width: 35vw;
     height: 80vh;
 }
 
-.dialog-title, .dialog-content, dialog-buttons {
+.dialog-title, .dialog-content {
     display: block;
     margin: auto;
     align-items: center;
     position: relative;
     width: 100%;
     padding-bottom: 3vh;
+}
+
+.dialog-main-container {
+    width: 100%;
+}
+
+.dialog-buttons {
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+    gap: 2vh;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
 }
 
 .dialog-title img {
@@ -209,7 +229,9 @@ button:active {
 }
 
 .dialog-pause-buttons-container {
-    display: table-row;
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
     margin: auto;
     align-items: center;
     justify-content: center;
@@ -287,7 +309,7 @@ button:active {
 
 #dialog-btn-resume {
     display: block;
-    width: 12vw;
+    width: 50%;
     margin-bottom: 1vh;
     color: #44842c;
     background-color: #73cd4b !important;
@@ -296,7 +318,7 @@ button:active {
 }
 #dialog-btn-exit {
     display: block;
-    width: 12vw;
+    width: 50%;
     margin-bottom: 1vh;
     color: #cc5c14;
     background-color: #ee7120 !important;
@@ -305,7 +327,7 @@ button:active {
 }
 #dialog-btn-restart {
     display: block;
-    width: 12vw;
+    width: 50%;
     margin-bottom: 1vh;
     color: #166e93;
     background-color: #1ea7e1 !important;
@@ -314,7 +336,7 @@ button:active {
 }
 #dialog-end-btn-exit {
     display: block;
-    width: 12vw;
+    width: 50%;
     margin-bottom: 1vh;
     color: #cc5c14;
     background-color: #ee7120 !important;
@@ -323,7 +345,7 @@ button:active {
 }
 #dialog-end-btn-restart {
     display: block;
-    width: 12vw;
+    width: 50%;
     margin-bottom: 1vh;
     color: #166e93;
     background-color: #1ea7e1 !important;
