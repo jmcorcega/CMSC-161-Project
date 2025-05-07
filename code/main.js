@@ -1,8 +1,10 @@
-import AudioService from "../lib/audio_service.js";
 import TitleScreen from "./title.js";
 import { loadPage } from '../lib/page_helper.js';
 
-const audioService = new AudioService();
+import {
+    audioService,
+} from '../lib/classes.js';
+
 const titleScreen = new TitleScreen();
 
 function preloadBgMusic() {

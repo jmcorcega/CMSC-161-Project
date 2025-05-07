@@ -1,13 +1,14 @@
 import { loadPage } from '../lib/page_helper.js';
 
 import Screen from './screen.js';
-import AudioService from '../lib/audio_service.js';
 
 import AboutScreen from './about.js';
 import LeaderboardScreen from './leaderboards.js';
 import GameScreen from './game.js';
 
-const audioService = new AudioService();
+import {
+    audioService,
+} from '../lib/classes.js';
 const aboutScreen = new AboutScreen();
 
 function renderSoundIcons() {
