@@ -1,7 +1,7 @@
 import { createApple, createRockGeometry, createGrassGeometry, createLogGeometry, createPlantGeometry } from './models.js';
 
 export const tileSize = 1;
-export const gridSize = 20;
+export const gridSize = 25;
 export const tileMap = {};
 
 export let grassTexture = null;
