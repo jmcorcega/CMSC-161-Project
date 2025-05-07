@@ -50,7 +50,7 @@ export async function destroyWebGL(gl) {
 export async function initWebGL() {
     // Initialize WebGL
     const canvas = document.getElementById('game-canvas');
-    const gl = canvas.getContext('webgl');
+    const gl = canvas.getContext('webgl2');
 
     if (!gl) {
         alert('WebGL not supported');
