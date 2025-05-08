@@ -9,6 +9,7 @@ import TitleScreen from './title.js';
 
 import {
     audioService,
+    storageService,
 } from '../lib/classes.js';
 
 import DialogController from '../lib/dialog.js';
@@ -21,6 +22,43 @@ let isWebGLReady = false;
 let endLevelMessage = "";
 let glContext = null;
 let gameLoopInterval = null;
+
+
+// Functions for handling skin selection
+export const skins = [
+    { id: "stars", name: "Stars", img: "img/skins/skin-1.png" },
+    { id: "floral", name: "Flowers", img: "img/skins/skin-2.png" },
+    { id: "gradient", name: "Neo", img: "img/skins/skin-3.png" },
+    { id: "galaxy", name: "Milky Way", img: "img/skins/skin-4.png" },
+    { id: "classic", name: "Classic", img: "img/skins/skin-5.png" },
+    { id: "scales", name: "Realistic", img: "img/skins/skin-6.jpg" },
+    { id: "pines", name: "Pines", img: "img/skins/skin-7.jpg" },
+]
+
+export function getCurrentSkin() {
+    const skin = storageService.getConfig("snake-skin");
+    if (skin == null) {
+        return skins[4]; // Default to the classic skin
+    } else {
+        return skins.find(s => s.id === skin);
+    }
+}
+
+export function getCurrentSkinIdx() {
+    const skin = storageService.getConfig("snake-skin");
+    if (skin == null) {
+        return 4; // Default to the classic skin
+    } else {
+        return skins.findIndex(s => s.id === skin);
+    }
+}
+
+export function setCurrentSkin(skin) {
+    const skinId = skin.id;
+    storageService.setConfig("snake-skin", skinId);
+}
+
+// Functions for handling skin selection
 
 function showPauseMenu() {
     dialogController.showDialog(2);
@@ -233,10 +271,12 @@ async function startGame() {
 
     loadSnakeTexture(gl, () => {
         render(); // or any other function to run after texture is ready
-    }, 5);
+    }, getCurrentSkin().img);
 
     function onPressLeft(e) {
         if (isPaused) return;
+        if (isGameFinished) return;
+        if (isGameOver) return;
 
         audioService.playSfx("turn");
         facingAngle -= Math.PI / 2;
@@ -245,6 +285,8 @@ async function startGame() {
     
     function onPressRight(e) {
         if (isPaused) return;
+        if (isGameFinished) return;
+        if (isGameOver) return;
 
         audioService.playSfx("turn");
         facingAngle += Math.PI / 2;
@@ -253,6 +295,9 @@ async function startGame() {
 
     function onPressEscape(e) {
         if (isPaused) return;
+        if (isGameFinished) return;
+        if (isGameOver) return;
+
         isPaused = true;
         audioService.pauseBgm();
         showPauseMenu();

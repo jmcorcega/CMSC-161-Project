@@ -3,7 +3,7 @@ export let snakeTexture = null;
 export function loadSnakeTexture(gl, callback, skin) {
     snakeTexture = gl.createTexture();
     const snakeImage = new Image();
-    snakeImage.src = `../img/skins/skin-${skin}.png`;
+    snakeImage.src = skin;
 
     snakeImage.onload = () => {
         gl.bindTexture(gl.TEXTURE_2D, snakeTexture);

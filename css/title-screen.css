@@ -118,3 +118,66 @@
     filter: invert(100%) brightness(100%) !important;
 }
 
+.title-skin-picker {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1em;
+    width: 100%;
+}
+
+.title-skin-picker h2 {
+    font-size: 1.25rem;
+    font-family: 'Kenney Rocket';
+    color: #1ea7e1;
+}
+
+#title-skin-picker-name {
+    font-size: 1rem;
+    font-family: 'Kenney Mini';
+    color: #a88600;
+}
+
+.title-skin-picker-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 1em;
+    width: 100%;
+}
+
+.title-skin-picker-item {
+    height: 5vw;
+    width: 5vw;
+    border-radius: 100%;
+
+    box-shadow: 0px 0px 25px 0px rgba(0,0,0,0.25);
+    -webkit-box-shadow: 0px 0px 25px 0px rgba(0,0,0,0.25);
+    -moz-box-shadow: 0px 0px 25px 0px rgba(0,0,0,0.25);
+}
+
+#title-skin-picker-item-middle {
+    height: 8vw;
+    width: 8vw;
+    padding: 0.25vw;
+
+    border-color: #ffcc00;
+    border-width: 0.5vw;
+    border-style: solid;
+}
+
+.title-skin-picker-item img {
+    height: 100%;
+    width: 100%;
+    border-radius: 100%;
+
+    /* fit crop */
+    object-fit: cover;
+}
+
+.title-skin-picker-arrow:active {
+    transform: translateY(4px);
+}
+
