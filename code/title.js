@@ -102,7 +102,7 @@ const onMusicBtnClick = function (e) {
     audioService.playSfx("select");
     audioService.setBgmState(!oldState);
 
-    if (audioService.getBgmState()) {
+    if (!oldState) {
         audioService.playBgm(true);
     } else {
         audioService.stopBgm();
