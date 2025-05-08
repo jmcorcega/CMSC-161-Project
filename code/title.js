@@ -105,7 +105,7 @@ const onMusicBtnClick = function (e) {
     if (!oldState) {
         audioService.playBgm(true);
     } else {
-        audioService.stopBgm();
+        audioService.stopBgm(true);
     }
 
     renderSoundIcons();
