@@ -72,9 +72,9 @@ export function createLogGeometry(height = 1.5) {
     // Log dimensions
     const width = 1;
     const depth = 1;
-    const hsx = width / 2;
-    const hsy = height / 2;
-    const hsz = depth / 2;
+    const x = width / 2;
+    const y = height / 2;
+    const z = depth / 2;
 
     // Colors: ends (lighter), body (darker)
     const endColor = [0.6, 0.4, 0.2];   // Lighter ends
@@ -82,17 +82,17 @@ export function createLogGeometry(height = 1.5) {
 
     const faces = [
         // Front face (z+)
-        { normal: [0, 0, 1], color: bodyColor, verts: [-hsx, -hsy, hsz,  hsx, -hsy, hsz,  hsx, hsy, hsz,  -hsx, hsy, hsz] },
+        { normal: [0, 0, 1], color: bodyColor, verts: [-x, -y, z,  x, -y, z,  x, y, z,  -x, y, z] },
         // Back face (z-)
-        { normal: [0, 0, -1], color: bodyColor, verts: [hsx, -hsy, -hsz, -hsx, -hsy, -hsz, -hsx, hsy, -hsz, hsx, hsy, -hsz] },
+        { normal: [0, 0, -1], color: bodyColor, verts: [x, -y, -z, -x, -y, -z, -x, y, -z, x, y, -z] },
         // Top face (y+)
-        { normal: [0, 1, 0], color: bodyColor, verts: [-hsx, hsy, hsz,  hsx, hsy, hsz,  hsx, hsy, -hsz, -hsx, hsy, -hsz] },
+        { normal: [0, 1, 0], color: bodyColor, verts: [-x, y, z,  x, y, z,  x, y, -z, -x, y, -z] },
         // Bottom face (y-)
-        { normal: [0, -1, 0], color: bodyColor, verts: [-hsx, -hsy, -hsz,  hsx, -hsy, -hsz,  hsx, -hsy, hsz, -hsx, -hsy, hsz] },
+        { normal: [0, -1, 0], color: bodyColor, verts: [-x, -y, -z,  x, -y, -z,  x, -y, z, -x, -y, z] },
         // Right face (x+)
-        { normal: [1, 0, 0], color: endColor, verts: [hsx, -hsy, hsz, hsx, -hsy, -hsz, hsx, hsy, -hsz, hsx, hsy, hsz] },
+        { normal: [1, 0, 0], color: endColor, verts: [x, -y, z, x, -y, -z, x, y, -z, x, y, z] },
         // Left face (x-)
-        { normal: [-1, 0, 0], color: endColor, verts: [-hsx, -hsy, -hsz, -hsx, -hsy, hsz, -hsx, hsy, hsz, -hsx, hsy, -hsz] },
+        { normal: [-1, 0, 0], color: endColor, verts: [-x, -y, -z, -x, -y, z, -x, y, z, -x, y, -z] },
     ];
 
     const vertices = [];
@@ -113,20 +113,19 @@ export function createLogGeometry(height = 1.5) {
 }
 
 
-export function createGrassGeometry(bladeCount = Math.floor(Math.random() * 4) + 10) {
+export function createGrassGeometry(bladeCount = Math.floor(Math.random() * 4) + 8) {
     const clusterVertices = [];
     const clusterNormals = [];
 
     for (let i = 0; i < bladeCount; i++) {
-        // const height = Math.random() * 0.3 + 0.2;
-        const height = Math.random() * 0.5 + 0.2;
-        const width = 0.05;
+        const height = Math.random() * 0.4 + 0.2;
+        const width = 0.06;
         const curveAmount = 0.1;
         const segments = 3;
 
         // Slight random offset per blade
-        const offsetX = (Math.random() - 0.5) * 0.1;
-        const offsetZ = (Math.random() - 0.5) * 0.1;
+        const offsetX = (Math.random() - 0.5) * 0.98;
+        const offsetZ = (Math.random() - 0.5) * 0.98;
 
         // Slight random rotation per blade
         const angle = Math.random() * Math.PI * 2;

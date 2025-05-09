@@ -119,10 +119,10 @@ let plantGeometry = null;
 
 export let food = null;
 
-export function placeRocksAndGrass(rockCount = 20, grassCount = Object.keys(tileMap).length / 8) {
+export function placeEnvironmentObjects(rockCount = 20, grassCount = Object.keys(tileMap).length / 2, logGroupCount = 2) {
     const keys = Object.keys(tileMap);
 
-    // Clear previous objects before redrawing
+    // Clear all previous environment objects
     rocks = [];
     logs = [];
     grasses = [];
@@ -137,30 +137,78 @@ export function placeRocksAndGrass(rockCount = 20, grassCount = Object.keys(tile
         if (tile.z > maxZ) maxZ = tile.z;
     }
 
-    let rockPlaced = 0;
-    let grassPlaced = 0;
-
-    // Shuffle tile keys
+    // Shuffle tile keys once
     for (let i = keys.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [keys[i], keys[j]] = [keys[j], keys[i]];
     }
 
-    // Initialize shared geometry
+    // Geometry caching
     if (!grassGeometry) grassGeometry = createGrassGeometry();
     if (!plantGeometry) plantGeometry = createPlantGeometry();
 
+    let rockPlaced = 0;
+    let grassPlaced = 0;
+    let logGroupsPlaced = 0;
+
+    const directions = [
+        [1, 0],  // +x
+        [-1, 0], // -x
+        [0, 1],  // +z
+        [0, -1], // -z
+    ];
+
     for (let i = 0; i < keys.length; i++) {
-        const tile = tileMap[keys[i]];
-        // if (tile.occupied) continue;
-        
-        // avoid spawning at the edges/borders
+        const key = keys[i];
+        const tile = tileMap[key];
+
+        // Avoid borders
         if (
-            tile.x === minX || tile.x === maxX+1 ||
-            tile.z === minZ || tile.z === maxZ+1 ||
+            tile.x === minX || tile.x === maxX + 1 ||
+            tile.z === minZ || tile.z === maxZ + 1 ||
             tile.occupied
         ) continue;
 
+        // Try to place logs first (less common and multi-tile)
+        if (logGroupsPlaced < logGroupCount) {
+            const length = Math.floor(Math.random() * 3) + 3; // 3–6 logs
+            const [dx, dz] = directions[Math.floor(Math.random() * directions.length)];
+            const group = [];
+
+            let valid = true;
+            for (let j = 0; j < length; j++) {
+                const tx = tile.x + j * dx;
+                const tz = tile.z + j * dz;
+                const groupKey = `${tx},${tz}`;
+                const groupTile = tileMap[groupKey];
+                if (!groupTile || groupTile.occupied) {
+                    valid = false;
+                    break;
+                }
+                group.push(groupTile);
+            }
+
+            if (valid) {
+                const logGeometry = createLogGeometry();
+                for (const groupTile of group) {
+                    const { vertices, normals, colors } = logGeometry;
+                    logs.push({
+                        x: groupTile.x,
+                        z: groupTile.z,
+                        y: 0,
+                        vertices,
+                        normals,
+                        colors,
+                    });
+                    groupTile.occupied = true;
+                    groupTile.object = 'log';
+                }
+                logGroupsPlaced++;
+                continue;
+            }
+        }
+
+        // Place a rock
         if (rockPlaced < rockCount) {
             const { vertices, normals } = createRockGeometry(Math.random() * 1.5 + 0.5);
             const scale = [0.6, 1.0, 1.2][Math.floor(Math.random() * 3)];
@@ -176,13 +224,16 @@ export function placeRocksAndGrass(rockCount = 20, grassCount = Object.keys(tile
             tile.occupied = true;
             tile.object = 'rock';
             rockPlaced++;
-        } else if (grassPlaced < grassCount) {
+            continue;
+        }
+
+        // Place grass if rock wasn't placed
+        if (grassPlaced < grassCount) {
             const isPlant = grassPlaced % 7 === 0;
             const numBlades = isPlant ? 1 : Math.floor(Math.random() * 3) + 8;
 
             for (let j = 0; j < numBlades; j++) {
                 const geometry = isPlant ? plantGeometry : grassGeometry;
-
                 const offsetX = isPlant ? 0 : (Math.random() - 0.5) * 1.0;
                 const offsetZ = isPlant ? 0 : (Math.random() - 0.5) * 1.0;
                 const rotation = Math.random() * Math.PI * 2;
@@ -194,7 +245,7 @@ export function placeRocksAndGrass(rockCount = 20, grassCount = Object.keys(tile
                     rotation,
                 });
 
-                if (isPlant) break; // only one plant per tile
+                if (isPlant) break;
             }
 
             grassPlaced++;
@@ -202,70 +253,6 @@ export function placeRocksAndGrass(rockCount = 20, grassCount = Object.keys(tile
     }
 }
 
-
-export function placeLogs(logGroupCount = 2) {
-    const keys = Object.keys(tileMap);
-
-    // Clear previous logs before redrawing
-    logs = [];
-    
-    // Shuffle tiles
-    for (let i = keys.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [keys[i], keys[j]] = [keys[j], keys[i]];
-    }
-
-    let placed = 0;
-    const directions = [
-        [1, 0],  // +x
-        [-1, 0], // -x
-        [0, 1],  // +z
-        [0, -1], // -z
-    ];
-
-    for (let i = 0; i < keys.length && placed < logGroupCount; i++) {
-        const startTile = tileMap[keys[i]];
-        if (startTile.occupied) continue;
-
-        const length = Math.floor(Math.random() * 3) + 3; // 3–6 logs
-        const [dx, dz] = directions[Math.floor(Math.random() * directions.length)];
-
-        const group = [];
-
-        let valid = true;
-        for (let j = 0; j < length; j++) {
-            const tx = startTile.x + j * dx;
-            const tz = startTile.z + j * dz;
-            const key = `${tx},${tz}`;
-            const tile = tileMap[key];
-            if (!tile || tile.occupied) {
-                valid = false;
-                break;
-            }
-            group.push(tile);
-        }
-
-        if (!valid) continue;
-
-        let logGeometry = createLogGeometry();
-
-        for (const tile of group) {
-            const { vertices, normals, colors } = logGeometry;
-            logs.push({
-                x: tile.x,
-                z: tile.z,
-                y: 0,
-                vertices,
-                normals,
-                colors,
-            });
-            tile.occupied = true;
-            tile.object = 'log';
-        }
-
-        placed++;
-    }
-}
 
 
 export function drawRocks(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture, uForceLight, uLightDirection) {
@@ -341,27 +328,50 @@ export function drawLogs(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTextu
 }
 
 
+let posBuffer, normalBuffer;
+
+// Call this function once during initialization
+export function initGrassBuffers(gl) {
+    // Flatten the grass blade data and put it into the buffers
+    const allVertices = [];
+    const allNormals = [];
+    
+    for (let blade of grasses) {
+        allVertices.push(...blade.vertices);
+        allNormals.push(...blade.normals);
+    }
+
+    // Create the position and normal buffers only once
+    posBuffer = gl.createBuffer();
+    normalBuffer = gl.createBuffer();
+
+    // Fill the position buffer with all grass vertices
+    gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(allVertices), gl.STATIC_DRAW);
+
+    // Fill the normal buffer with all grass normals
+    gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(allNormals), gl.STATIC_DRAW);
+}
+
+
 export function drawGrasses(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture, uForceLight, uLightDirection) {
     gl.uniform1f(uForceLight, 1.0);
     gl.uniform1i(uUseTexture, false);
     gl.uniform3fv(uColor, [0.30, 0.81, 0.24]);
-    // gl.uniform3fv(uColor, [0.34, 0.77, 0.28]);
-
     gl.uniform3fv(uLightDirection, [0.0, -1.0, 0.0]);
 
+    // Bind the position and normal buffers that were created once
+    gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
+    gl.vertexAttribPointer(aPosition, 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(aPosition);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+    gl.vertexAttribPointer(aNormal, 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(aNormal);
+
+    // Draw each grass blade with different model transformations
     for (let blade of grasses) {
-        const posBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(blade.vertices), gl.STATIC_DRAW);
-        gl.vertexAttribPointer(aPosition, 3, gl.FLOAT, false, 0, 0);
-        gl.enableVertexAttribArray(aPosition);
-
-        const normalBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(blade.normals), gl.STATIC_DRAW);
-        gl.vertexAttribPointer(aNormal, 3, gl.FLOAT, false, 0, 0);
-        gl.enableVertexAttribArray(aNormal);
-
         const modelMatrix = mat4.create();
         mat4.translate(modelMatrix, modelMatrix, blade.position);
         mat4.rotateY(modelMatrix, modelMatrix, blade.rotation);

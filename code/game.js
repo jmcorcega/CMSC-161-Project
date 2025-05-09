@@ -1,4 +1,4 @@
-import { createTileMap, loadGrassTexture, tileMap, placeRocksAndGrass, placeLogs, 
+import { createTileMap, loadGrassTexture, initGrassBuffers, tileMap, placeEnvironmentObjects, 
     drawTiles, drawRocks, drawLogs, drawGrasses, drawFood, placeFood, food, gridSize } from './tilemap.js';
 import { initWebGL, destroyWebGL } from './init_webgl.js';  // Import the initWebGL function
 import { drawSnake, loadSnakeTexture } from './snake-map.js';
@@ -232,7 +232,7 @@ async function startGame() {
     // let movementSpeed = 350;  // Initial speed
 
     // New variables to control movement speed
-    let movementSpeed = 150; // Snake moves every 150ms
+    let movementSpeed = 500; // Snake moves every 150ms
     let movementProgress = 0; // Tracks progress of movement (0 to 1)
     let lastMoveTime = 0;   // Track the last time snake moved
 
@@ -257,8 +257,7 @@ async function startGame() {
     }, frameRate);
 
     createTileMap();
-    placeRocksAndGrass();
-    placeLogs();
+    placeEnvironmentObjects();
     placeFood();
     
     // Collecting all rocks from the tileMap
@@ -306,6 +305,8 @@ async function startGame() {
     registerKeyListener('left', 'A', 'keydown', onPressLeft);
     registerKeyListener('right', 'D', 'keydown', onPressRight);
     registerKeyListener('escape', 'Escape', 'keydown', onPressEscape);
+
+    initGrassBuffers(gl);
 
     function render() { 
         const currentTime = Date.now();
