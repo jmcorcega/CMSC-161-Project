@@ -232,7 +232,7 @@ async function startGame() {
     // let movementSpeed = 350;  // Initial speed
 
     // New variables to control movement speed
-    let movementSpeed = 500; // Snake moves every 150ms
+    let movementSpeed = 150; // Snake moves every 150ms
     let movementProgress = 0; // Tracks progress of movement (0 to 1)
     let lastMoveTime = 0;   // Track the last time snake moved
 
@@ -311,7 +311,8 @@ async function startGame() {
     function render() { 
         const currentTime = Date.now();
         const deltaTime = currentTime - lastMoveTime;
-    
+        lastMoveTime = currentTime; 
+
         // Update movement progress
         movementProgress += deltaTime / movementSpeed;
     
@@ -320,7 +321,7 @@ async function startGame() {
         if (movementProgress >= 1) {
             // Complete the movement and reset progress
             movementProgress = 0;
-            lastMoveTime = currentTime;
+            // lastMoveTime = currentTime;
     
             // Compute new head position
             const dx = Math.round(Math.cos(facingAngle));
@@ -403,6 +404,8 @@ async function startGame() {
         drawGrasses(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture, uForceLight, uLightDirection);
         drawFood(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture, uForceLight, uLightDirection);
     
+        // ============================= COLLISION DETECTION ============================= //
+
         // Check for collisions with the snake itself
         for (let i = 1; i < snake.length; i++) {
             if (snake[0].x == snake[i].x && snake[0].y == snake[i].y) {
@@ -413,8 +416,6 @@ async function startGame() {
             }
         }
         
-        // ============================= COLLISION DETECTION ============================= //
-
         // Check for collisions with logs
         for (let i = 0; i < logs.length; i++) {
             if (snake[0].x == logs[i].x && snake[0].y == logs[i].z) {
