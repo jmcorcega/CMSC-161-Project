@@ -113,12 +113,13 @@ export function createLogGeometry(height = 1.5) {
 }
 
 
-export function createGrassGeometry(bladeCount = Math.floor(Math.random() * 4) + 8) {
+export function createGrassGeometry(basisHeight) {
+    const bladeCount = Math.floor(Math.random() * 4) + 8;
     const clusterVertices = [];
     const clusterNormals = [];
 
     for (let i = 0; i < bladeCount; i++) {
-        const height = Math.random() * 0.4 + 0.2;
+        const height = Math.random() * 0.4 + basisHeight;
         const width = 0.06;
         const curveAmount = 0.1;
         const segments = 3;
@@ -489,6 +490,78 @@ export function createTruckHead(height) {
 
     return { vertices: finalVerts, normals: finalNormals, textures: finalTexCoords };
 }
+
+
+export function createTreeGeometry() {
+    // Randomize values
+    const trunkHeight = 0.6 + (Math.random() * 0.4 - 0.1); 
+    const trunkRadius = 0.1 + (Math.random() * 0.03 - 0.02); 
+    const leafHeight = 0.8 + (Math.random() * 0.2 - 0.1); 
+    const leafRadius = 0.4 + (Math.random() * 0.1 - 0.05); 
+    const radialSegments = 12;
+
+    // Offset within the tile to randomize position
+    const offsetX = (Math.random() - 0.6) * 0.3;  // Random offset 
+    const offsetZ = (Math.random() - 0.6) * 0.3;
+
+    const vertices = [];
+    const normals = [];
+
+    // === Trunk: cylinder ===
+    for (let i = 0; i < radialSegments; i++) {
+        const theta1 = (i / radialSegments) * 2 * Math.PI;
+        const theta2 = ((i + 1) / radialSegments) * 2 * Math.PI;
+
+        const x1 = Math.cos(theta1) * trunkRadius + offsetX;
+        const z1 = Math.sin(theta1) * trunkRadius + offsetZ;
+        const x2 = Math.cos(theta2) * trunkRadius + offsetX;
+        const z2 = Math.sin(theta2) * trunkRadius + offsetZ;
+
+        const yBottom = 0;
+        const yTop = trunkHeight;
+
+        // Triangle 1
+        vertices.push(x1, yBottom, z1, x1, yTop, z1, x2, yTop, z2);
+        // Triangle 2
+        vertices.push(x1, yBottom, z1, x2, yTop, z2, x2, yBottom, z2);
+
+        for (let j = 0; j < 6; j++) {
+            normals.push(Math.cos(theta1), 0, Math.sin(theta1));
+        }
+    }
+
+    const trunkVertexCount = vertices.length / 3;
+
+    // === Leaves: cone ===
+    for (let i = 0; i < radialSegments; i++) {
+        const theta1 = (i / radialSegments) * 2 * Math.PI;
+        const theta2 = ((i + 1) / radialSegments) * 2 * Math.PI;
+
+        const x1 = Math.cos(theta1) * leafRadius + offsetX;
+        const z1 = Math.sin(theta1) * leafRadius + offsetZ;
+        const x2 = Math.cos(theta2) * leafRadius + offsetX;
+        const z2 = Math.sin(theta2) * leafRadius + offsetZ;
+
+        const yBase = trunkHeight;
+        const yApex = trunkHeight + leafHeight;
+
+        vertices.push(x1, yBase, z1, x2, yBase, z2, offsetX, yApex, offsetZ);
+
+        const nx = (x1 + x2) / 2 - offsetX;
+        const nz = (z1 + z2) / 2 - offsetZ;
+        const length = Math.hypot(nx, leafHeight, nz);
+        for (let j = 0; j < 3; j++) {
+            normals.push(nx / length, leafHeight / length, nz / length);
+        }
+    }
+
+    return {
+        vertices,
+        normals,
+        trunkVertexCount
+    };
+}
+
 
 export function createSnakeHeadWithFeatures() {
     const head = createTruckHead(0.5);  // Replace with truck head

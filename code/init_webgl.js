@@ -59,7 +59,7 @@ export async function initWebGL() {
 
     // Enable depth and set clear color (sky will be out of view)
     gl.enable(gl.DEPTH_TEST);
-    gl.clearColor(0.6, 0.9, 0.6, 1); // ground green
+    gl.clearColor(56/255, 138/255, 45/255, 1); // ground green
 
     // Load shader sources
     const vertexShaderSource = await loadShaderSource('../shaders/vertex-shader.glsl');

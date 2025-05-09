@@ -1,5 +1,6 @@
-import { createTileMap, loadGrassTexture, initGrassBuffers, tileMap, placeEnvironmentObjects, 
-    drawTiles, drawRocks, drawLogs, drawGrasses, drawFood, placeFood, food, gridSize } from './tilemap.js';
+import { createTileMap, loadGrassTexture, initGrassBuffers, tileMap, placeTrees, placeEnvironmentObjects, 
+    drawTiles, drawRocks, drawLogs, drawGrasses, drawFood, placeFood, food, gridSize, 
+    drawTrees} from './tilemap.js';
 import { initWebGL, destroyWebGL } from './init_webgl.js';  // Import the initWebGL function
 import { drawSnake, loadSnakeTexture } from './snake-map.js';
 import { registerKeyListener, unregisterKeyListener } from '../lib/key_listener.js';
@@ -176,26 +177,6 @@ function perspective(fov, aspect, near, far) {
     ]);
 }
 
-function createGridLines(size = 20, step = 1) {
-    const lines = [];
-    for (let i = -size; i <= size; i += step) {
-        // Lines parallel to X-axis
-        lines.push(-size, 0, i, size, 0, i);
-        // Lines parallel to Z-axis
-        lines.push(i, 0, -size, i, 0, size);
-    }
-    return new Float32Array(lines);
-}
-
-function identity() {
-    return new Float32Array([
-        1, 0, 0, 0,
-        0, 1, 0, 0,
-        0, 0, 1, 0,
-        0, 0, 0, 1
-    ]);
-}
-
 async function startGame() {
     const {
         canvas, gl, shaderProgram,
@@ -257,6 +238,7 @@ async function startGame() {
     }, frameRate);
 
     createTileMap();
+    placeTrees();
     placeEnvironmentObjects();
     placeFood();
     
@@ -399,6 +381,7 @@ async function startGame() {
         );
     
         drawTiles(gl, aPosition, aNormal, aTexCoord, uModelMatrix, uUseTexture, uTexture);
+        drawTrees(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture, uForceLight, uLightDirection);
         drawRocks(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture, uForceLight, uLightDirection);
         drawLogs(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture, uForceLight, uLightDirection);
         drawGrasses(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture, uForceLight, uLightDirection);

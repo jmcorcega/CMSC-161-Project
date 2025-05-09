@@ -48,6 +48,6 @@ export default class Screen {
                 closeLoadingScreen();
                 setTimeout(() => this.onAfterShow(), 1000);
             }
-        }, 100);
+        }, 200);
     }
 }

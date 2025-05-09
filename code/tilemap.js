@@ -1,4 +1,4 @@
-import { createApple, createRockGeometry, createGrassGeometry, createLogGeometry, createPlantGeometry } from './models.js';
+import { createApple, createRockGeometry, createGrassGeometry, createLogGeometry, createPlantGeometry, createTreeGeometry } from './models.js';
 
 export const tileSize = 1;
 export const gridSize = 25;
@@ -109,15 +109,75 @@ export function translate(x, y, z) {
     ]);
 }
 
-
+let trees = [];
 let rocks = [];
 let logs = [];
 let grasses = [];
+let bounderyGrasses = []
 
 let grassGeometry = null;
 let plantGeometry = null;
 
 export let food = null;
+
+export function placeTrees() {
+    trees = [];
+
+    const keys = Object.keys(tileMap);
+    const offset = 3;
+
+    let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
+    for (const key of keys) {
+        const tile = tileMap[key];
+        if (tile.x < minX) minX = tile.x;
+        if (tile.x > maxX) maxX = tile.x;
+        if (tile.z < minZ) minZ = tile.z;
+        if (tile.z > maxZ) maxZ = tile.z;
+    }
+
+    for (const key in tileMap) {
+        const tile = tileMap[key];
+        
+        const spacing = 2;
+        const shouldSkip = (tile.x + tile.z) % spacing !== 0;
+        if (shouldSkip) continue;
+
+        const isLeft = tile.x === minX;
+        const isRight = tile.x === maxX;
+        const isTop = tile.z === minZ;
+        const isBottom = tile.z === maxZ;
+
+        let place = false;
+        let x = tile.x;
+        let z = tile.z;
+
+        if (isLeft) { x -= offset; place = true; } 
+        else if (isRight) { x += offset; place = true; }
+
+        if (isTop) { z -= offset; place = true; } 
+        else if (isBottom) { z += offset; place = true; }
+
+        if (!place) continue;
+
+        const { vertices, normals, trunkVertexCount } = createTreeGeometry();
+
+        tile.occupied = true;
+        tile.object = "tree";
+
+        trees.push({
+            x,
+            z,
+            y: 0,
+            vertices,
+            normals,
+            trunkVertexCount,
+            scale: 8
+        });
+    }
+}
+
+
+
 
 export function placeEnvironmentObjects(rockCount = 20, grassCount = Object.keys(tileMap).length / 2, logGroupCount = 2) {
     const keys = Object.keys(tileMap);
@@ -126,6 +186,7 @@ export function placeEnvironmentObjects(rockCount = 20, grassCount = Object.keys
     rocks = [];
     logs = [];
     grasses = [];
+    bounderyGrasses = [];
 
     // Compute map boundaries
     let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
@@ -144,7 +205,7 @@ export function placeEnvironmentObjects(rockCount = 20, grassCount = Object.keys
     }
 
     // Geometry caching
-    if (!grassGeometry) grassGeometry = createGrassGeometry();
+    if (!grassGeometry) grassGeometry = createGrassGeometry(0.2);
     if (!plantGeometry) plantGeometry = createPlantGeometry();
 
     let rockPlaced = 0;
@@ -251,8 +312,118 @@ export function placeEnvironmentObjects(rockCount = 20, grassCount = Object.keys
             grassPlaced++;
         }
     }
+
+    placeBoundaryGrasses();
 }
 
+
+function placeBoundaryGrasses() {    
+    const keys = Object.keys(tileMap);
+
+    const tallGrassGeometry = createGrassGeometry(0.65);
+    const boundaryGrassLimit = keys.length / 8;
+    let boundaryGrassPlaced = 0;
+    
+    // Determine bounds
+    let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
+    for (const key of keys) {
+        const tile = tileMap[key];
+        minX = Math.min(minX, tile.x);
+        maxX = Math.max(maxX, tile.x);
+        minZ = Math.min(minZ, tile.z);
+        maxZ = Math.max(maxZ, tile.z);
+    }
+    
+    // Loop to place grass in margin layers
+    for (const key of keys) {
+        if (boundaryGrassPlaced >= boundaryGrassLimit) break;
+    
+        const tile = tileMap[key];
+    
+        const isLeft = tile.x === minX;
+        const isRight = tile.x === maxX;
+        const isTop = tile.z === minZ;
+        const isBottom = tile.z === maxZ;
+
+        let place = false;
+        let x = tile.x;
+        let z = tile.z;
+
+        let offset = Math.floor(Math.random() * 3) + 1; // grass position outside the edges
+
+        if (isLeft) { x -= (offset+0.3); place = true; } 
+        else if (isRight) { x += (offset+1); place = true; }
+
+        if (isTop) { z -= (offset+0.2); place = true; } 
+        else if (isBottom) { z += (offset+1); place = true; }
+
+        if (!place) continue;
+    
+        const isPlant = boundaryGrassPlaced % 7 === 0;
+        const numBlades = isPlant ? 1 : Math.floor(Math.random() * 3) + 5;
+    
+        for (let j = 0; j < numBlades; j++) {
+            const geometry = isPlant ? plantGeometry : tallGrassGeometry;
+            const offsetX = isPlant ? 0 : (Math.random() - 0.5) * 0.8;
+            const offsetZ = isPlant ? 0 : (Math.random() - 0.5) * 0.8;
+            const rotation = Math.random() * Math.PI * 2;
+    
+            bounderyGrasses.push({
+                vertices: geometry.vertices,
+                normals: geometry.normals,
+                position: [x + offsetX, 0, z + offsetZ],
+                rotation,
+            });
+    
+            if (isPlant) break;
+        }
+    
+        boundaryGrassPlaced++;
+    }
+}
+
+
+export function drawTrees(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture, uForceLight, uLightDirection) {
+    gl.uniform1i(uUseTexture, false);
+    gl.uniform1f(uForceLight, 0.55);
+    gl.uniform3fv(uLightDirection, [0.7, -1.0, 0.3]);
+
+    for (const tree of trees) {
+        const { vertices, normals, x, y, z, scale, trunkVertexCount } = tree;
+
+        // Create buffers
+        const posBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+        gl.vertexAttribPointer(aPosition, 3, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(aPosition);
+
+        const normBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, normBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
+        gl.vertexAttribPointer(aNormal, 3, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(aNormal);
+
+        // Set model matrix
+        const modelMatrix = mat4.create();
+        mat4.translate(modelMatrix, modelMatrix, [x + 0.5, y, z + 0.5]);
+        mat4.scale(modelMatrix, modelMatrix, [scale, scale, scale]);
+        gl.uniformMatrix4fv(uModelMatrix, false, modelMatrix);
+
+        // --- Draw trunk (brown) ---
+        gl.uniform3fv(uColor, [0.4, 0.26, 0.13]); // brown
+        gl.drawArrays(gl.TRIANGLES, 0, trunkVertexCount);
+
+        // --- Draw leaves (green) ---
+        gl.uniform3fv(uColor, [0.2, 0.8, 0.3]); // green
+        const totalVertexCount = vertices.length / 3;
+        gl.drawArrays(gl.TRIANGLES, trunkVertexCount, totalVertexCount - trunkVertexCount);
+
+        // Clean up
+        gl.deleteBuffer(posBuffer);
+        gl.deleteBuffer(normBuffer);
+    }
+}
 
 
 export function drawRocks(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture, uForceLight, uLightDirection) {
@@ -329,6 +500,7 @@ export function drawLogs(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTextu
 
 
 let posBuffer, normalBuffer;
+let tposBuffer, tnormalBuffer; // for tall grass
 
 // Call this function once during initialization
 export function initGrassBuffers(gl) {
@@ -352,6 +524,22 @@ export function initGrassBuffers(gl) {
     // Fill the normal buffer with all grass normals
     gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(allNormals), gl.STATIC_DRAW);
+
+    const tallVertices = [];
+    const tallNormals = [];
+
+    for (let tblade of bounderyGrasses) {
+        tallVertices.push(...tblade.vertices);
+        tallNormals.push(...tblade.normals);
+    }
+
+    tposBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, tposBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(tallVertices), gl.STATIC_DRAW);
+
+    tnormalBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, tnormalBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(tallNormals), gl.STATIC_DRAW);
 }
 
 
@@ -378,6 +566,26 @@ export function drawGrasses(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTe
 
         gl.uniformMatrix4fv(uModelMatrix, false, modelMatrix);
         gl.drawArrays(gl.TRIANGLES, 0, blade.vertices.length / 3);
+    }
+
+    // Bind again for the tall grasses (boundaries)
+    gl.bindBuffer(gl.ARRAY_BUFFER, tposBuffer);
+    gl.vertexAttribPointer(aPosition, 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(aPosition);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, tnormalBuffer);
+    gl.vertexAttribPointer(aNormal, 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(aNormal);
+
+    gl.uniform3fv(uColor, [46/255, 118/255, 35/255]);
+
+    for (let bgrass of bounderyGrasses) {
+        const modelMatrix = mat4.create();
+        mat4.translate(modelMatrix, modelMatrix, bgrass.position);
+        mat4.rotateY(modelMatrix, modelMatrix, bgrass.rotation);
+
+        gl.uniformMatrix4fv(uModelMatrix, false, modelMatrix);
+        gl.drawArrays(gl.TRIANGLES, 0, bgrass.vertices.length / 3);
     }
 }
 
