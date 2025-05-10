@@ -1,5 +1,5 @@
 import { createTileMap, loadGrassTexture, initGrassBuffers, tileMap, placeTrees, placeEnvironmentObjects, 
-    drawTiles, drawRocks, drawLogs, drawGrasses, drawFood, placeFood, food, gridSize, 
+    drawTiles, drawRocks, drawLogs, drawGrasses, drawFoods, placeFoods, gridSize, foods, 
     drawTrees} from './tilemap.js';
 import { initWebGL, destroyWebGL } from './init_webgl.js';  // Import the initWebGL function
 import { drawSnake, loadSnakeTexture } from './snake-map.js';
@@ -238,9 +238,9 @@ async function startGame() {
     }, frameRate);
 
     createTileMap();
+    placeFoods(5);  // place 5 initial foods in the map
     placeTrees();
     placeEnvironmentObjects();
-    placeFood();
     
     // Collecting all rocks from the tileMap
     const rocks = Object.values(tileMap).filter(tile => tile.object === "rock");
@@ -385,7 +385,7 @@ async function startGame() {
         drawRocks(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture, uForceLight, uLightDirection);
         drawLogs(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture, uForceLight, uLightDirection);
         drawGrasses(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture, uForceLight, uLightDirection);
-        drawFood(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture, uForceLight, uLightDirection);
+        drawFoods(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture, uForceLight, uLightDirection);
     
         // ============================= COLLISION DETECTION ============================= //
 
@@ -428,32 +428,35 @@ async function startGame() {
             return;
         }
 
-        if (snake[0].x == food.x && snake[0].y == food.z) {
-            // Play sound effect
-            audioService.playSfx("food");
-
-            // Remove food from the map
-            food.x = -1; // Set to an invalid position
-            food.z = -1; // Set to an invalid position
-
-            // Add a new segment to the snake
-            const newSegment = { x: snake[snake.length - 1].x, y: snake[snake.length - 1].y };
-            snake.push(newSegment);
-
-            // Place new food on the map
-            placeFood();
-
-            // Update eaten count
-            let newEaten = parseInt(eaten.innerHTML) + 1;
-            eaten.innerHTML = newEaten;
-
-            // Compute for score - this is kinda unfair, where the more you eat, the less score you get
-            let newScore = parseInt(score.innerHTML) + (100 - (newEaten * 10));
-            score.innerHTML = newScore;
-
-            // Speed up the game (decrease the movement speed)
-            movementSpeed = Math.max(33, movementSpeed - 10);  // Don't go below 33ms
+        for (let i = 0; i < foods.length; i++) {
+            const f = foods[i];
+        
+            if (snake[0].x === f.x && snake[0].y === f.z) {
+                // Play sound effect
+                audioService.playSfx("food");
+        
+                // Remove eaten food
+                foods.splice(i, 1); // Remove from array
+        
+                // Add a new segment to the snake
+                const last = snake[snake.length - 1];
+                snake.push({ x: last.x, y: last.y });
+        
+                placeFoods(1); // push a new item into `foods`
+        
+                // Update eaten count
+                let newEaten = parseInt(eaten.innerHTML) + 1;
+                eaten.innerHTML = newEaten;
+        
+                // Update score
+                let newScore = parseInt(score.innerHTML) + (newEaten * 10);
+                score.innerHTML = newScore;
+        
+                // Speed up game (min 33ms delay)
+                movementSpeed = Math.max(33, movementSpeed - 5);
+            }
         }
+        
 
         gl.uniform1f(uForceLight, 0.0); 
     }

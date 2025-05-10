@@ -1,7 +1,7 @@
 import { createApple, createRockGeometry, createGrassGeometry, createLogGeometry, createPlantGeometry, createTreeGeometry } from './models.js';
 
 export const tileSize = 1;
-export const gridSize = 25;
+export const gridSize = 30;
 export const tileMap = {};
 
 export let grassTexture = null;
@@ -118,7 +118,7 @@ let bounderyGrasses = []
 let grassGeometry = null;
 let plantGeometry = null;
 
-export let food = null;
+export let foods = [];
 
 export function placeTrees() {
     trees = [];
@@ -179,7 +179,7 @@ export function placeTrees() {
 
 
 
-export function placeEnvironmentObjects(rockCount = 20, grassCount = Object.keys(tileMap).length / 2, logGroupCount = 2) {
+export function placeEnvironmentObjects(rockCount = 25, grassCount = Object.keys(tileMap).length / 2, logGroupCount = 3) {
     const keys = Object.keys(tileMap);
 
     // Clear all previous environment objects
@@ -590,12 +590,17 @@ export function drawGrasses(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTe
 }
 
 
-export function placeFood(count = 1) {
+export function placeFoods(count) {
+    if (foods.length >= 5) return;
+
     const keys = Object.keys(tileMap);
     let placed = 0;
 
-    // Clear previous food before redrawing
-    food = null;
+    const colors = [
+        [0.8, 0, 0],
+        [1, 1, 0.247],
+        [0.788, 0.800, 0.247]
+    ];
 
     while (placed < count && keys.length > 0) {
         const index = Math.floor(Math.random() * keys.length);
@@ -611,14 +616,15 @@ export function placeFood(count = 1) {
             tile.occupied = true;
             tile.object = 'food';
 
-            food = {
+            foods.push({
+                color: colors[Math.floor(Math.random() * 3)], // ensures the index is always within the range 0–2
                 x: tile.x,
                 z: tile.z,
                 vertices,
                 normals,
                 indices,
                 scale,
-            };
+            });
 
             placed++;
         }
@@ -626,43 +632,45 @@ export function placeFood(count = 1) {
 }
 
 
-export function drawFood(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture, uForceLight, uLightDirection) {
-    if (!food) return;
+export function drawFoods(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture, uForceLight, uLightDirection) {
+    if (!foods || foods.length === 0) return;
 
-    // Create buffers
+    // Create buffers 
     const positionBuffer = gl.createBuffer();
     const normalBuffer = gl.createBuffer();
     const indexBuffer = gl.createBuffer();
 
-    // === Draw Apple ===
+    // === Apple geometry (assumed shared across all apples) ===
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(food.vertices), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(foods[0].vertices), gl.STATIC_DRAW);
     gl.vertexAttribPointer(aPosition, 3, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(aPosition);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(food.normals), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(foods[0].normals), gl.STATIC_DRAW);
     gl.vertexAttribPointer(aNormal, 3, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(aNormal);
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(food.indices), gl.STATIC_DRAW);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(foods[0].indices), gl.STATIC_DRAW);
 
-    const modelMatrix = mat4.create();
-    mat4.translate(modelMatrix, modelMatrix, [food.x, 0.6, food.z]);
-    mat4.scale(modelMatrix, modelMatrix, [food.scale, food.scale, food.scale]);
-    gl.uniformMatrix4fv(uModelMatrix, false, modelMatrix);
-
-    const colors = [[0.8, 0, 0], [1, 1, 0.247], [0.788, 0.800, 0.247]];
-    const colorIndex = Math.floor(Math.random() * colors.length);
-    gl.uniform1f(uForceLight, 0.4);
+    // Set shared uniform states
     gl.uniform1i(uUseTexture, false);
-    gl.uniform3fv(uColor, colors[colorIndex]);
     gl.uniform3fv(uLightDirection, [0.5, 1.0, 0.0]);
 
-    gl.drawElements(gl.TRIANGLES, food.indices.length, gl.UNSIGNED_SHORT, 0);
+    for (const f of foods) {
+        const modelMatrix = mat4.create();
+        mat4.translate(modelMatrix, modelMatrix, [f.x, 0.6, f.z]);
+        mat4.scale(modelMatrix, modelMatrix, [f.scale, f.scale, f.scale]);
 
-    // === Draw Green Trunk ===
+        gl.uniformMatrix4fv(uModelMatrix, false, modelMatrix);
+        gl.uniform3fv(uColor, f.color);
+        gl.uniform1f(uForceLight, 0.4);
+
+        gl.drawElements(gl.TRIANGLES, f.indices.length, gl.UNSIGNED_SHORT, 0);
+    }
+
+    // === Draw shared trunk geometry ===
     const trunkHeight = 0.5;
     const trunkRadius = 0.1;
     const trunkSegments = 8;
@@ -671,14 +679,13 @@ export function drawFood(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTextu
     const trunkNormals = [];
     const trunkIndices = [];
 
-    // Top of apple is y = 1 after scaling
     for (let i = 0; i <= trunkSegments; i++) {
         const angle = (i / trunkSegments) * 2 * Math.PI;
         const x = Math.cos(angle) * trunkRadius;
         const z = Math.sin(angle) * trunkRadius;
 
-        trunkVertices.push(x, 1.0, z);                  // base (attached to apple top)
-        trunkVertices.push(x, 1.0 + trunkHeight, z);    // top
+        trunkVertices.push(x, 1.0, z);
+        trunkVertices.push(x, 1.0 + trunkHeight, z);
 
         trunkNormals.push(0, 1, 0);
         trunkNormals.push(0, 1, 0);
@@ -701,10 +708,15 @@ export function drawFood(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTextu
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(trunkIndices), gl.STATIC_DRAW);
 
-    // Apply same transformation
-    gl.uniformMatrix4fv(uModelMatrix, false, modelMatrix);
     gl.uniform3fv(uColor, [0.5, 0, 0.0]); // green trunk
 
-    gl.drawElements(gl.TRIANGLES, trunkIndices.length, gl.UNSIGNED_SHORT, 0);
+    for (const f of foods) {
+        const modelMatrix = mat4.create();
+        mat4.translate(modelMatrix, modelMatrix, [f.x, 0.6, f.z]);
+        mat4.scale(modelMatrix, modelMatrix, [f.scale, f.scale, f.scale]);
+
+        gl.uniformMatrix4fv(uModelMatrix, false, modelMatrix);
+        gl.drawElements(gl.TRIANGLES, trunkIndices.length, gl.UNSIGNED_SHORT, 0);
+    }
 }
 
