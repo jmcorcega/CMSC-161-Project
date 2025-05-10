@@ -6,6 +6,7 @@ async function loadShaderSource(url) {
 }
 
 function initShaderProgram(gl, vsSource, fsSource) {
+    // Initialize shaders
     const v = gl.createShader(gl.VERTEX_SHADER);
     gl.shaderSource(v, vsSource);
     gl.compileShader(v);
@@ -101,6 +102,7 @@ export async function initWebGL() {
     const texCoordBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textures), gl.STATIC_DRAW);
+    
     // Return all necessary WebGL objects
     return {
         canvas,

@@ -1,19 +1,19 @@
-import { createTileMap, loadGrassTexture, initGrassBuffers, tileMap, placeTrees, placeEnvironmentObjects, 
-    drawTiles, drawRocks, drawLogs, drawGrasses, drawFoods, placeFoods, gridSize, foods, 
-    drawTrees} from './tilemap.js';
-import { initWebGL, destroyWebGL } from './init_webgl.js';  // Import the initWebGL function
-import { drawSnake, loadSnakeTexture } from './snake-map.js';
-import { registerKeyListener, unregisterKeyListener } from '../lib/key_listener.js';
-
 import Screen from './screen.js';
 import TitleScreen from './title.js';
-
-import {
-    audioService,
-    storageService,
-} from '../lib/classes.js';
-
 import DialogController from '../lib/dialog.js';
+
+import { initWebGL, destroyWebGL } from './init_webgl.js';
+import { drawSnake, loadSnakeTexture } from './snake-map.js';
+import { registerKeyListener, unregisterKeyListener } from '../lib/key_listener.js';
+import { audioService, storageService, } from '../lib/classes.js';
+
+import { createTileMap, loadGrassTexture, initGrassBuffers, tileMap, 
+         placeTrees, placeEnvironmentObjects, placeFoods,
+         drawTiles, drawRocks, drawLogs, drawGrasses, drawFoods, drawTrees,
+         gridSize, foods 
+} from './tilemap.js';
+
+
 const dialogController = new DialogController();
 
 let isPaused = false;
@@ -36,6 +36,7 @@ export const skins = [
     { id: "pines", name: "Pines", img: "img/skins/skin-7.jpg" },
 ]
 
+
 export function getCurrentSkin() {
     const skin = storageService.getConfig("snake-skin");
     if (skin == null) {
@@ -44,6 +45,7 @@ export function getCurrentSkin() {
         return skins.find(s => s.id === skin);
     }
 }
+
 
 export function getCurrentSkinIdx() {
     const skin = storageService.getConfig("snake-skin");
@@ -54,20 +56,22 @@ export function getCurrentSkinIdx() {
     }
 }
 
+
 export function setCurrentSkin(skin) {
     const skinId = skin.id;
     storageService.setConfig("snake-skin", skinId);
 }
 
-// Functions for handling skin selection
 
 function showPauseMenu() {
     dialogController.showDialog(2);
 }
 
+
 function closePauseMenu() {
     dialogController.closeDialog(2);
 }
+
 
 function onGameOver() {
     audioService.stopBgm();
@@ -78,6 +82,7 @@ function onGameOver() {
         dialogController.showDialog(3);
     }, 3000);
 }
+
 
 function onResumeGame() {
     closePauseMenu();
@@ -90,6 +95,7 @@ function onResumeGame() {
     }, 1000);
 }
 
+
 function onRestartGame() {
     dialogController.closeDialog(2);
     dialogController.closeDialog(3);
@@ -99,6 +105,7 @@ function onRestartGame() {
     audioService.playSfx("close");
     new GameScreen().loadScreen();
 }
+
 
 function __onExitGame() {
     isGameFinished = true;
@@ -117,6 +124,7 @@ function __onExitGame() {
     }
 }
 
+
 function onExitGame() {
     dialogController.closeDialog(2);
     dialogController.closeDialog(3);
@@ -126,15 +134,9 @@ function onExitGame() {
     new TitleScreen().loadScreen();
 }
 
-function translate(x, y, z) {
-    return new Float32Array([
-        1,0,0,0,
-        0,1,0,0,
-        0,0,1,0,
-        x,y,z,1
-    ]);
-}
 
+// Creates a perspective projection matrix based on field of view, 
+// aspect ratio, near and far clipping planes
 function perspective(fov, aspect, near, far) {
     const f = 1.0 / Math.tan((fov * Math.PI) / 360);
     return new Float32Array([
@@ -145,27 +147,33 @@ function perspective(fov, aspect, near, far) {
     ]);
 }
 
-    function lookAt(eye, center, up) {
-    const [ex, ey, ez] = eye;
-    const [cx, cy, cz] = center;
-    const [ux, uy, uz] = up;
 
+// Creates a view matrix that positions the camera in the scene
+function lookAt(eye, center, up) {
+    const [ex, ey, ez] = eye;       // Camera position
+    const [cx, cy, cz] = center;    // Target point the camera is looking at
+    const [ux, uy, uz] = up;        // Up direction
+
+    // Compute forward (z) vector
     let zx = ex - cx,
         zy = ey - cy,
         zz = ez - cz;
     const zl = Math.hypot(zx, zy, zz);
     zx /= zl; zy /= zl; zz /= zl;
 
+    // Compute right (x) vector
     let xx = uy * zz - uz * zy,
         xy = uz * zx - ux * zz,
         xz = ux * zy - uy * zx;
     const xl = Math.hypot(xx, xy, xz);
     xx /= xl; xy /= xl; xz /= xl;
 
+    // Compute true up (y) vector
     let yx = zy * xz - zz * xy,
         yy = zz * xx - zx * xz,
         yz = zx * xy - zy * xx;
 
+    // Return combined rotation and translation
     return new Float32Array([
         xx, yx, zx, 0,
         xy, yy, zy, 0,
@@ -176,6 +184,7 @@ function perspective(fov, aspect, near, far) {
         1
     ]);
 }
+
 
 async function startGame() {
     const {
@@ -208,9 +217,6 @@ async function startGame() {
     let facingAngle = 0;
     let targetAngle = 0;
     let cameraAngle = 0;
-
-    // Set initial movement speed (interval in milliseconds)
-    // let movementSpeed = 350;  // Initial speed
 
     // New variables to control movement speed
     let movementSpeed = 150; // Snake moves every 150ms
@@ -254,6 +260,7 @@ async function startGame() {
         render(); // or any other function to run after texture is ready
     }, getCurrentSkin().img);
 
+    // left turn - rotate the character 90 degrees to the left
     function onPressLeft(e) {
         if (isPaused) return;
         if (isGameFinished) return;
@@ -264,6 +271,7 @@ async function startGame() {
         targetAngle -= Math.PI / 2;
     }
     
+    // right turn - rotate the character 90 degrees to the right
     function onPressRight(e) {
         if (isPaused) return;
         if (isGameFinished) return;
@@ -274,6 +282,7 @@ async function startGame() {
         targetAngle += Math.PI / 2;
     }
 
+    // pause the game and show the pause menu
     function onPressEscape(e) {
         if (isPaused) return;
         if (isGameFinished) return;
@@ -363,6 +372,7 @@ async function startGame() {
         const camY = 8;
         const camZ = interpolatedSnake[0].y - Math.sin(cameraAngle) * camOffset;
     
+        // Define camera position, the point to look at, and the up direction
         const eye = [camX, camY, camZ];
         const center = [interpolatedSnake[0].x, 0, interpolatedSnake[0].y];
         const up = [0, 1, 0];
@@ -370,6 +380,7 @@ async function startGame() {
         const projMatrix = perspective(45, canvas.width / canvas.height, 0.1, 100);
         const viewMatrix = lookAt(eye, center, up);
     
+        // Draw the snake using interpolated positions
         drawSnake(gl, positionBuffer, normalBuffer, texCoordBuffer,
             aPosition, aNormal, aTexCoord,
             uViewMatrix, uProjMatrix, uModelMatrix,
@@ -379,7 +390,8 @@ async function startGame() {
             vertices, verticesHead, normalsHead, texturesHead,
             facingAngle  // <- Pass the facingAngle to drawSnake
         );
-    
+
+        // Draw the environment elements
         drawTiles(gl, aPosition, aNormal, aTexCoord, uModelMatrix, uUseTexture, uTexture);
         drawTrees(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture, uForceLight, uLightDirection);
         drawRocks(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture, uForceLight, uLightDirection);
@@ -428,6 +440,7 @@ async function startGame() {
             return;
         }
 
+        // Check for food collisions and update game state
         for (let i = 0; i < foods.length; i++) {
             const f = foods[i];
         
@@ -457,7 +470,7 @@ async function startGame() {
             }
         }
         
-
+        // Reset lighting override
         gl.uniform1f(uForceLight, 0.0); 
     }
 

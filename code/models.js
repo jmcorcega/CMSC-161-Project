@@ -4,14 +4,15 @@ export function createRockGeometry() {
     const vertices = [];
     const normals = [];
 
-    const subdivisions = 8;
+    const subdivisions = 8;  // Number of segments for rock geometry
 
     const topRing = [];
     const bottomRing = [];
 
+    // Generate top and bottom rings of the rock with random heights
     for (let i = 0; i < subdivisions; i++) {
         const angle = (Math.PI * 2 * i) / subdivisions;
-        const baseRadius = getRandom(0.4, 0.5);
+        const baseRadius = getRandom(0.4, 0.5); // Random radius 
 
         const x = Math.cos(angle) * baseRadius;
         const z = Math.sin(angle) * baseRadius;
@@ -23,8 +24,9 @@ export function createRockGeometry() {
     const topCenter = [0, getRandom(0.3, 0.4), 0];
     const bottomCenter = [0, -0.1, 0];
 
+    // Loop for creating triangles for each face
     for (let i = 0; i < subdivisions; i++) {
-        const next = (i + 1) % subdivisions;
+        const next = (i + 1) % subdivisions;    // Wrap around to form a loop
 
         const t1 = topRing[i];
         const t2 = topRing[next];
@@ -32,7 +34,7 @@ export function createRockGeometry() {
         const b2 = bottomRing[next];
 
         if (t1 == undefined || t2 == undefined || b1 == undefined || b2 == undefined) {
-            return { vertices, normals }; 
+            return { vertices, normals };       // Prevent undefined vertices
         }
 
         // Top cap triangle
@@ -59,11 +61,16 @@ export function createRockGeometry() {
 }
 
 function computeNormal(p1, p2, p3) {
+    // Calculate two vectors from the points
     const u = [p2[0] - p1[0], p2[1] - p1[1], p2[2] - p1[2]];
     const v = [p3[0] - p1[0], p3[1] - p1[1], p3[2] - p1[2]];
+
+    // Compute the cross product of the two vectors
     const nx = u[1] * v[2] - u[2] * v[1];
     const ny = u[2] * v[0] - u[0] * v[2];
     const nz = u[0] * v[1] - u[1] * v[0];
+
+    // Normalize the normal vector
     const len = Math.hypot(nx, ny, nz);
     return [nx / len, ny / len, nz / len];
 }
@@ -103,9 +110,9 @@ export function createLogGeometry(height = 1.5) {
         for (let i = 0; i < 6; i++) {
             const vi = [0, 1, 2, 0, 2, 3][i]; // triangle indices
             const offset = vi * 3;
-            vertices.push(...face.verts.slice(offset, offset + 3));
-            normals.push(...face.normal);
-            colors.push(face.color);
+            vertices.push(...face.verts.slice(offset, offset + 3));  // Add vertices
+            normals.push(...face.normal);                            // Add normals for each triangle
+            colors.push(face.color);                                 // Add color
         }
     }
 
@@ -114,12 +121,12 @@ export function createLogGeometry(height = 1.5) {
 
 
 export function createGrassGeometry(basisHeight) {
-    const bladeCount = Math.floor(Math.random() * 4) + 8;
+    const bladeCount = Math.floor(Math.random() * 4) + 8;   // 8 to 12 random number of grass blades 
     const clusterVertices = [];
     const clusterNormals = [];
 
     for (let i = 0; i < bladeCount; i++) {
-        const height = Math.random() * 0.4 + basisHeight;
+        const height = Math.random() * 0.4 + basisHeight;   // Random height for each grass blade with basis height
         const width = 0.06;
         const curveAmount = 0.1;
         const segments = 3;
@@ -133,13 +140,17 @@ export function createGrassGeometry(basisHeight) {
         const cosA = Math.cos(angle);
         const sinA = Math.sin(angle);
 
+        // Loop through segments of each grass blade
         for (let j = 0; j < segments; j++) {
-            const y1 = (j / segments) * height;
+            // Y position for the first and second vertex
+            const y1 = (j / segments) * height;                                 
             const y2 = ((j + 1) / segments) * height;
 
+            // Curve effect on z
             const z1 = Math.sin((j / segments) * Math.PI) * curveAmount;
             const z2 = Math.sin(((j + 1) / segments) * Math.PI) * curveAmount;
 
+            // Left and right side of the blade
             const leftX1 = -width / 2;
             const rightX1 = width / 2;
 
@@ -156,12 +167,14 @@ export function createGrassGeometry(basisHeight) {
                 [leftX2, y2, z2],
             ];
 
+            // Apply rotation to each vertex of the blade
             for (let [x, y, z] of verts) {
                 const rx = x * cosA - z * sinA + offsetX;
                 const rz = x * sinA + z * cosA + offsetZ;
                 clusterVertices.push(rx, y, rz);
             }
 
+            // Normals for the grass blade
             for (let k = 0; k < 6; k++) {
                 clusterNormals.push(0, 0.7, 0.7); // gently upwards
             }
@@ -174,6 +187,7 @@ export function createGrassGeometry(basisHeight) {
     };
 }
 
+
 export function createPlantGeometry() {
     const stemHeight = 0.8;
     const stemWidth = 0.04;
@@ -182,15 +196,18 @@ export function createPlantGeometry() {
     const stemNormals = [];
 
     // Simple vertical stem (as a thin quad)
+    // Two triangles to form the rectangular stem
     stemVertices.push(
-        -stemWidth / 2, 0, 0,
-         stemWidth / 2, 0, 0,
-        -stemWidth / 2, stemHeight, 0,
+        -stemWidth / 2, 0, 0,           // Bottom-left
+         stemWidth / 2, 0, 0,           // Bottom-right
+        -stemWidth / 2, stemHeight, 0,  // Top-left
 
-         stemWidth / 2, 0, 0,
-         stemWidth / 2, stemHeight, 0,
-        -stemWidth / 2, stemHeight, 0
+         stemWidth / 2, 0, 0,           // Bottom-right
+         stemWidth / 2, stemHeight, 0,  // Top-right
+        -stemWidth / 2, stemHeight, 0   // Top-left
     );
+
+    // Normals for the stem 
     for (let i = 0; i < 6; i++) {
         stemNormals.push(0, 0, 1);
     }
@@ -198,39 +215,42 @@ export function createPlantGeometry() {
     const leaves = [];
     const leafNormals = [];
 
-    const leafCount = Math.random() * 3 + 2;
+    const leafCount = Math.random() * 3 + 2;   // 2 to 5 random number of leaves
     const leafWidth = 0.25;
     const leafHeight = 0.15;
 
+    // Generate each leaf
     for (let i = 1; i <= leafCount; i++) {
         const yPos = (i / (leafCount + 1)) * stemHeight;
         const angle = (i % 2 === 0) ? Math.PI / 4 : -Math.PI / 4;
 
         // Simple leaf quad, positioned out from the stem
+        // First triangle for the leaf
         leaves.push(
             0, yPos, 0,
             leafWidth * Math.cos(angle), yPos + leafHeight / 2, leafWidth * Math.sin(angle),
             leafWidth * Math.cos(angle), yPos - leafHeight / 2, leafWidth * Math.sin(angle)
         );
 
+        // Second triangle for the leaf (mirror of the first one)
         leaves.push(
             0, yPos, 0,
             leafWidth * Math.cos(angle), yPos - leafHeight / 2, leafWidth * Math.sin(angle),
             0, yPos, 0
         );
 
+        // Normals for the leaves
         for (let j = 0; j < 6; j++) {
             leafNormals.push(0, 0.5, 0.5);
         }
     }
 
+    // Combine the stem and leaves
     const vertices = [...stemVertices, ...leaves];
     const normals = [...stemNormals, ...leafNormals];
 
     return { vertices, normals };
 }
-
-
 
 
 export function createSnakeBody(height) {
@@ -329,7 +349,9 @@ export function createSnakeBody(height) {
     const finalNormals = [];
     const finalTexCoords = [];
     for (let i = 0; i < orderedVerts.length; i++) {
-        let vi = orderedVerts[i];
+        let vi = orderedVerts[i];   // Get the vertex index from orderedVerts
+
+        // Add values to the corresponding array
         finalVerts.push(v[vi * 3], v[vi * 3 + 1], v[vi * 3 + 2]);
         finalNormals.push(n[vi * 3], n[vi * 3 + 1], n[vi * 3 + 2]);
         finalTexCoords.push(t[vi * 2], t[vi * 2 + 1]);
@@ -500,23 +522,28 @@ export function createTreeGeometry() {
     const leafRadius = 0.4 + (Math.random() * 0.1 - 0.05); 
     const radialSegments = 12;
 
-    // Offset within the tile to randomize position
+    // Random offset for varying tree positions
     const offsetX = (Math.random() - 0.6) * 0.3;  // Random offset 
     const offsetZ = (Math.random() - 0.6) * 0.3;
 
     const vertices = [];
     const normals = [];
 
-    // === Trunk: cylinder ===
+    // Trunk - cylinder 
     for (let i = 0; i < radialSegments; i++) {
+        // Compute angles for the circular base
         const theta1 = (i / radialSegments) * 2 * Math.PI;
         const theta2 = ((i + 1) / radialSegments) * 2 * Math.PI;
 
+        // Coordinats for the first point on the circle
         const x1 = Math.cos(theta1) * trunkRadius + offsetX;
         const z1 = Math.sin(theta1) * trunkRadius + offsetZ;
+
+        // Second point
         const x2 = Math.cos(theta2) * trunkRadius + offsetX;
         const z2 = Math.sin(theta2) * trunkRadius + offsetZ;
 
+        // Coordinates for the base and the top of the trunk
         const yBottom = 0;
         const yTop = trunkHeight;
 
@@ -525,6 +552,7 @@ export function createTreeGeometry() {
         // Triangle 2
         vertices.push(x1, yBottom, z1, x2, yTop, z2, x2, yBottom, z2);
 
+        // Normals for the cylinder faces
         for (let j = 0; j < 6; j++) {
             normals.push(Math.cos(theta1), 0, Math.sin(theta1));
         }
@@ -532,21 +560,26 @@ export function createTreeGeometry() {
 
     const trunkVertexCount = vertices.length / 3;
 
-    // === Leaves: cone ===
+    // Leaves - cone 
     for (let i = 0; i < radialSegments; i++) {
+        // Compute angle for the circular base of the cone
         const theta1 = (i / radialSegments) * 2 * Math.PI;
         const theta2 = ((i + 1) / radialSegments) * 2 * Math.PI;
 
+        // Calculate for the two base points of the cone triangle
         const x1 = Math.cos(theta1) * leafRadius + offsetX;
         const z1 = Math.sin(theta1) * leafRadius + offsetZ;
         const x2 = Math.cos(theta2) * leafRadius + offsetX;
         const z2 = Math.sin(theta2) * leafRadius + offsetZ;
 
+        // Define the vertical positions
         const yBase = trunkHeight;
         const yApex = trunkHeight + leafHeight;
 
+        // Cone surface
         vertices.push(x1, yBase, z1, x2, yBase, z2, offsetX, yApex, offsetZ);
 
+        // Compute and normalize the normal vector 
         const nx = (x1 + x2) / 2 - offsetX;
         const nz = (z1 + z2) / 2 - offsetZ;
         const length = Math.hypot(nx, leafHeight, nz);
