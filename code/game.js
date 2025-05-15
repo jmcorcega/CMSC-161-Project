@@ -351,7 +351,8 @@ async function startGame() {
             } else {
                 // Interpolate based on the trail
                 const prev = positionTrail[index - 1];
-                const curr = positionTrail[index];
+                const curr = positionTrail[index] || {x: prev.x == positionTrail[index - 2].x ? prev.x : prev.x+1, y: prev.y == positionTrail[index - 2].y ? prev.y : prev.y+1};
+                
                 return {
                     x: curr.x + (prev.x - curr.x) * movementProgress,
                     y: curr.y + (prev.y - curr.y) * movementProgress,
@@ -398,7 +399,7 @@ async function startGame() {
         drawTrees(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture, uForceLight, uLightDirection);
         drawRocks(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture, uForceLight, uLightDirection);
         drawLogs(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture, uForceLight, uLightDirection);
-        drawGrasses(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture, uForceLight, uLightDirection);
+        // drawGrasses(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture, uForceLight, uLightDirection);
         drawFoods(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture, uForceLight, uLightDirection);
     
         // ============================= COLLISION DETECTION ============================= //
