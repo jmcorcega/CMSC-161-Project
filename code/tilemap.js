@@ -650,14 +650,22 @@ export function placeFoods(count) {
         const key = keys.splice(index, 1)[0];
         const tile = tileMap[key];
 
+        // Compute map boundaries
+        let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
+        for (const key of keys) {
+            const tile = tileMap[key];
+            if (tile.x < minX) minX = tile.x;
+            if (tile.x > maxX) maxX = tile.x;
+            if (tile.z < minZ) minZ = tile.z;
+            if (tile.z > maxZ) maxZ = tile.z;
+        }
+
         // Skip tiles that are on the edge or already occupied
-        if (
+        if (!(
             tile.x === minX || tile.x === maxX + 1 ||
             tile.z === minZ || tile.z === maxZ + 1 ||
             tile.occupied
-        ) continue;
-
-        if (!tile.occupied) {
+        )) {
             const { vertices, normals, indices } = createApple();
 
             // Define possible sizes

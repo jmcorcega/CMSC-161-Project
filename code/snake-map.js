@@ -88,7 +88,6 @@ export function drawSnake(gl, positionBuffer, normalBuffer, texCoordBuffer,
             // Head
             let counter = 0;
             for (const [key, value] of Object.entries(textureLengthsHead)) {
-                console.log (key, value);
                 const length = value;
                 const headVertices = verticesHead.slice(counter * 3, counter * 3 + length * 3);
                 const headNormals = normalsHead.slice(counter * 3, counter * 3 + length * 3);
