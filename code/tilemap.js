@@ -126,7 +126,7 @@ let trees = [];
 let rocks = [];
 let logs = [];
 let grasses = [];
-let bounderyGrasses = []
+let boundaryGrasses = []
 
 let grassGeometry = null;
 let plantGeometry = null;
@@ -201,7 +201,7 @@ export function placeEnvironmentObjects(rockCount = 25, grassCount = Object.keys
     rocks = [];
     logs = [];
     grasses = [];
-    bounderyGrasses = [];
+    boundaryGrasses = [];
 
     // Compute map boundaries
     let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
@@ -399,7 +399,7 @@ function placeBoundaryGrasses() {
             // Random rotation
             const rotation = Math.random() * Math.PI * 2;
     
-            bounderyGrasses.push({
+            boundaryGrasses.push({
                 vertices: geometry.vertices,
                 normals: geometry.normals,
                 position: [x + offsetX, 0, z + offsetZ],
@@ -562,7 +562,7 @@ export function initGrassBuffers(gl) {
     const tallVertices = [];
     const tallNormals = [];
 
-    for (let tblade of bounderyGrasses) {
+    for (let tblade of boundaryGrasses) {
         tallVertices.push(...tblade.vertices);
         tallNormals.push(...tblade.normals);
     }
@@ -613,7 +613,7 @@ export function drawGrasses(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTe
 
     gl.uniform3fv(uColor, [46/255, 118/255, 35/255]);
 
-    for (let bgrass of bounderyGrasses) {
+    for (let bgrass of boundaryGrasses) {
         // Initialize the model matrix
         const modelMatrix = mat4.create();
 
@@ -649,21 +649,13 @@ export function placeFoods(count) {
         const index = Math.floor(Math.random() * keys.length);  // Randomly pick a tile key
         const key = keys.splice(index, 1)[0];
         const tile = tileMap[key];
-
-        // Compute map boundaries
-        let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
-        for (const key of keys) {
-            const tile = tileMap[key];
-            if (tile.x < minX) minX = tile.x;
-            if (tile.x > maxX) maxX = tile.x;
-            if (tile.z < minZ) minZ = tile.z;
-            if (tile.z > maxZ) maxZ = tile.z;
-        }
+        const minMaxX = 25; //  boundary for x value of food
+        const minMaxZ = 25; //  boundary for z value of food
 
         // Skip tiles that are on the edge or already occupied
         if (!(
-            tile.x === minX || tile.x === maxX + 1 ||
-            tile.z === minZ || tile.z === maxZ + 1 ||
+            tile.x < -minMaxX || tile.x > minMaxX ||
+            tile.z < -minMaxZ || tile.z > minMaxX ||
             tile.occupied
         )) {
             const { vertices, normals, indices } = createApple();
@@ -684,7 +676,6 @@ export function placeFoods(count) {
                 indices,
                 scale,
             });
-
             placed++;
         }
     }
