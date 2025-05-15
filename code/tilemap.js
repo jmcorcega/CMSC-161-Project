@@ -650,6 +650,13 @@ export function placeFoods(count) {
         const key = keys.splice(index, 1)[0];
         const tile = tileMap[key];
 
+        // Skip tiles that are on the edge or already occupied
+        if (
+            tile.x === minX || tile.x === maxX + 1 ||
+            tile.z === minZ || tile.z === maxZ + 1 ||
+            tile.occupied
+        ) continue;
+
         if (!tile.occupied) {
             const { vertices, normals, indices } = createApple();
 
