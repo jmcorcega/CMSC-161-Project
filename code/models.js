@@ -416,81 +416,191 @@ function createEye(radius, latBands, longBands, height, center) {
     };
 }
 
-
 export function createTruckHead(height) {
-    const h = height;
+    // Define the vertices for a trapezoidal head shape (like a truck front)
+    const v = [
+        // Side face
+        -0.6, -height,  0.5,  // front left
+         0.6, -height,  0.5,  // front right
+         0.6,  height*0.2,  0.5,  // front top right
+        -0.6,  height,  0.5,  // front top left
 
-    // Define key profile points for front and back
-    const front = [
-        [-0.6, -h,  0.5], // 0
-        [   0, -h,  0.5], // 1
-        [0.6, -h * 0.4, 0.5], // 2
-        [0.6,  h * 0.4, 0.5], // 3
-        [   0,  h,  0.5], // 4
-        [-0.6,  h,  0.5], // 5
+        // Side face 
+        -0.6, -height, -0.5,  // back left
+         0.6, -height, -0.5,  // back right
+         0.6,  height*0.2, -0.5,  // back top right
+        -0.6,  height, -0.5,  // back top left
+
+        // Top face
+        -0.6,  height,  0.5,  // front top left
+         0.6,  height*0.2,  0.5,  // front top right
+         0.6,  height*0.2, -0.5,  // back top right
+        -0.6,  height, -0.5,  // back top left
+
+        // Bottom face
+        -0.6, -height,  0.5,  // front left
+         0.6, -height,  0.5,  // front right
+         0.6, -height, -0.5,  // back right
+        -0.6, -height, -0.5,  // back left
+
+        // front face
+        0.6,  -height, 0.5,  // back right
+        0.6,  -height, -0.5,  // back top right
+        0.6,  height*0.2, -0.5,  // front top right
+        0.6,  height*0.2, 0.5,  // front right
+
+        // Back face
+        -0.6, -height,  0.5,  // front left
+        -0.6, -height, -0.5,  // back left
+        -0.6,  height, -0.5,  // back top left
+        -0.6,  height,  0.5,  // front top left
     ];
-    const back = front.map(([x, y, _z]) => [x, y, -0.5]);
 
-    const vertices = [];
-    const normals = [];
-    const textures = [];
+    const eyeNormals = new Array(6 * 3).fill(0).map((_, i) => (i % 3 === 2 ? 1 : 0)); // z normal
+    
+    // Modify UVs to make eyes white (no texture)
+    const eyeUVs = [
+        0, 0, 1, 0, 1, 1, 0, 1, // Left eye
+        0, 0, 1, 0, 1, 1, 0, 1, // Right eye
+    ];
+    // Define the normals for each face
+    const n = [
+        // Front face
+        0, 0, 1,  0, 0, 1,  0, 0, 1,  0, 0, 1,
+        // Back face
+        0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1,
+        // Top face
+        0, 1, 0,  0, 1, 0,  0, 1, 0,  0, 1, 0,
+        // Bottom face
+        0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0,
+        // Right face
+        1, 0, 0,  1, 0, 0,  1, 0, 0,  1, 0, 0,
+        // Left face
+        -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0,
+    ];
 
-    const faceNormal = (a, b, c) => {
-        const u = [b[0] - a[0], b[1] - a[1], b[2] - a[2]];
-        const v = [c[0] - a[0], c[1] - a[1], c[2] - a[2]];
-        const n = [
-            u[1]*v[2] - u[2]*v[1],
-            u[2]*v[0] - u[0]*v[2],
-            u[0]*v[1] - u[1]*v[0],
-        ];
-        const len = Math.hypot(...n);
-        return n.map(x => x / len);
-    };
+    // Texture coordinates (using the same texture for simplicity)
+    const t = [
+        // Front face
+        0, 0, 1, 0, 1, 1, 0, 1,
+        // Back face
+        0, 0, 1, 0, 1, 1, 0, 1,
+        // Top face
+        0, 0, 1, 0, 1, 1, 0, 1,
+        // Bottom face
+        0, 0, 1, 0, 1, 1, 0, 1,
+        // Right face
+        0, 0, 1, 0, 1, 1, 0, 1,
+        // Left face
+        0, 0, 1, 0, 1, 1, 0, 1,
+    ];
 
-    const addQuad = (a, b, c, d) => {
-        const normal = faceNormal(a, b, c);
-        [a, b, c, a, c, d].forEach(v => {
-            vertices.push(...v);
-            normals.push(...normal);
-            textures.push(0, 0); // placeholder
-        });
-    };
+    // Indices to triangles (optional — using drawArrays with ordered vertices)
+    const orderedVerts = [
+        0, 1, 2, 0, 2, 3,       // front
+        4, 5, 6, 4, 6, 7,       // back
+        8, 9,10, 8,10,11,       // top
+       12,13,14,12,14,15,       // bottom
+       16,17,18,16,18,19,       // right
+       20,21,22,20,22,23        // left
+    ];
 
-    // 1. Side faces (connecting front to back)
-    for (let i = 0; i < front.length - 1; i++) {
-        addQuad(front[i], front[i + 1], back[i + 1], back[i]);
+    // const finalEyes = [], finalEyeNormals = [], finalEyeUVs = [];
+    // for (let i = 0; i < eyeIndices.length; i++) {
+    //     let vi = eyeIndices[i];
+    //     finalEyes.push(eyes[vi * 3], eyes[vi * 3 + 1], eyes[vi * 3 + 2]);
+    //     finalEyeNormals.push(0, 0, 1);
+    //     finalEyeUVs.push(eyeUVs[vi * 2], eyeUVs[vi * 2 + 1]);
+    // }
+    // Final arrays to hold the vertices, normals, and texture coordinates
+    const finalVerts = [];
+    const finalNormals = [];
+    const finalTexCoords = [];
+    for (let i = 0; i < orderedVerts.length; i++) {
+        let vi = orderedVerts[i];
+        finalVerts.push(v[vi * 3], v[vi * 3 + 1], v[vi * 3 + 2]);
+        finalNormals.push(n[vi * 3], n[vi * 3 + 1], n[vi * 3 + 2]);
+        finalTexCoords.push(t[vi * 2], t[vi * 2 + 1]);
     }
 
-    // 2. Front face (cap)
-    for (let i = 1; i < front.length - 1; i++) {
-        const tri = [front[0], front[i], front[i + 1]];
-        const normal = [0, 0, 1];
-        tri.forEach(v => {
-            vertices.push(...v);
-            normals.push(...normal);
-            textures.push(0, 0);
-        });
-    }
-
-    // 3. Back face (cap)
-    for (let i = 1; i < back.length - 1; i++) {
-        const tri = [back[0], back[i + 1], back[i]]; // reversed winding
-        const normal = [0, 0, -1];
-        tri.forEach(v => {
-            vertices.push(...v);
-            normals.push(...normal);
-            textures.push(0, 0);
-        });
-    }
-
-    // 4. Top face
-    addQuad(front[4], front[5], back[5], back[4]);
-
-    // 5. Bottom face
-    addQuad(front[0], front[1], back[1], back[0]);
-
-    return { vertices, normals, textures };
+    // Combine all except for tongue
+    return { vertices: finalVerts, normals: finalNormals, textures: finalTexCoords };
 }
+
+// export function createTruckHead(height) {
+//     const h = height;
+
+//     // Define key profile points for front and back
+//     const front = [
+//         [-0.6, -h,  0.5], // 0
+//         [   0, -h,  0.5], // 1
+//         [0.6, -h * 0.4, 0.5], // 2
+//         [0.6,  h * 0.4, 0.5], // 3
+//         [   0,  h,  0.5], // 4
+//         [-0.6,  h,  0.5], // 5
+//     ];
+//     const back = front.map(([x, y, _z]) => [x, y, -0.5]);
+
+//     const vertices = [];
+//     const normals = [];
+//     const textures = [];
+
+//     const faceNormal = (a, b, c) => {
+//         const u = [b[0] - a[0], b[1] - a[1], b[2] - a[2]];
+//         const v = [c[0] - a[0], c[1] - a[1], c[2] - a[2]];
+//         const n = [
+//             u[1]*v[2] - u[2]*v[1],
+//             u[2]*v[0] - u[0]*v[2],
+//             u[0]*v[1] - u[1]*v[0],
+//         ];
+//         const len = Math.hypot(...n);
+//         return n.map(x => x / len);
+//     };
+
+//     const addQuad = (a, b, c, d) => {
+//         const normal = faceNormal(a, b, c);
+//         [a, b, c, a, c, d].forEach(v => {
+//             vertices.push(...v);
+//             normals.push(...normal);
+//             textures.push(0, 0); // placeholder
+//         });
+//     };
+
+//     // 1. Side faces (connecting front to back)
+//     for (let i = 0; i < front.length - 1; i++) {
+//         addQuad(front[i], front[i + 1], back[i + 1], back[i]);
+//     }
+
+//     // 2. Front face (cap)
+//     for (let i = 1; i < front.length - 1; i++) {
+//         const tri = [front[0], front[i], front[i + 1]];
+//         const normal = [0, 0, 1];
+//         tri.forEach(v => {
+//             vertices.push(...v);
+//             normals.push(...normal);
+//             textures.push(0, 0);
+//         });
+//     }
+
+//     // 3. Back face (cap)
+//     for (let i = 1; i < back.length - 1; i++) {
+//         const tri = [back[0], back[i + 1], back[i]]; // reversed winding
+//         const normal = [0, 0, -1];
+//         tri.forEach(v => {
+//             vertices.push(...v);
+//             normals.push(...normal);
+//             textures.push(0, 0);
+//         });
+//     }
+
+//     // 4. Top face
+//     addQuad(front[4], front[5], back[5], back[4]);
+
+//     // 5. Bottom face
+//     addQuad(front[0], front[1], back[1], back[0]);
+
+//     return { vertices, normals, textures };
+// }
 
 
 
@@ -580,8 +690,8 @@ export function createSnakeHeadWithFeatures() {
     const head = createTruckHead(0.5);  // Replace with truck head
 
     // Create black eyes (slightly larger)
-    const leftEye = createEye(0.2, 6, 6, 0.3, [0.1, 0.6, -0.3]);
-    const rightEye = createEye(0.2, 6, 6, 0.3, [0.1, 0.6, 0.3]);
+    const leftEye = createEye(0.2, 6, 6, 0.2, [0.1, 0.6, -0.3]);
+    const rightEye = createEye(0.2, 6, 6, 0.2, [0.1, 0.6, 0.3]);
 
     // Create sclera (smaller, offset slightly to prevent overlap)
     const leftEye1 = createEye(0.14, 6, 6, 0.15, [0.22, 0.5, -0.3]);  // Pupil
@@ -609,6 +719,13 @@ export function createSnakeHeadWithFeatures() {
             ...leftEye1.textures,
             ...rightEye1.textures
         ],
+        textureLengths: {
+            head: head.textures.length/2,
+            leftEye: leftEye.textures.length/2,
+            rightEye: rightEye.textures.length/2,
+            leftEye1: leftEye1.textures.length/2,
+            rightEye1: rightEye1.textures.length/2
+        }
     };
 }
 

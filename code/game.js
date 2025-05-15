@@ -194,9 +194,10 @@ async function startGame() {
         uLightDirection, uColor, uForceLight,
         aTexCoord, uUseTexture, uTexture, 
         uSampler, positionBuffer, normalBuffer, 
-        texCoordBuffer, vertices, verticesHead, 
-        normalsHead, texturesHead
+        texCoordBuffer, vertices, normals, textures,
+        verticesHead, normalsHead, texturesHead, textureLengthsHead
     } = await initWebGL();
+
     glContext = gl;
     const score = document.getElementById('score');
     const eaten = document.getElementById('eaten');
@@ -384,10 +385,11 @@ async function startGame() {
         drawSnake(gl, positionBuffer, normalBuffer, texCoordBuffer,
             aPosition, aNormal, aTexCoord,
             uViewMatrix, uProjMatrix, uModelMatrix,
-            uUseTexture, uSampler, uLightDirection, uForceLight,
+            uColor, uUseTexture, uSampler, uLightDirection, uForceLight,
             projMatrix, viewMatrix,
             interpolatedSnake, // <-- Pass interpolated positions for smooth movement
-            vertices, verticesHead, normalsHead, texturesHead,
+            vertices, normals, textures,
+            verticesHead, normalsHead, texturesHead, textureLengthsHead, 
             facingAngle  // <- Pass the facingAngle to drawSnake
         );
 
@@ -396,7 +398,7 @@ async function startGame() {
         drawTrees(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture, uForceLight, uLightDirection);
         drawRocks(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture, uForceLight, uLightDirection);
         drawLogs(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture, uForceLight, uLightDirection);
-        drawGrasses(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture, uForceLight, uLightDirection);
+        // drawGrasses(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture, uForceLight, uLightDirection);
         drawFoods(gl, aPosition, aNormal, uModelMatrix, uColor, uUseTexture, uForceLight, uLightDirection);
     
         // ============================= COLLISION DETECTION ============================= //

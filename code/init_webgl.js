@@ -87,7 +87,8 @@ export async function initWebGL() {
     const {
         vertices: verticesHead,
         normals: normalsHead,
-        textures: texturesHead
+        textures: texturesHead,
+        textureLengths: textureLengthsHead
     } = createSnakeHeadWithFeatures();
 
     const { vertices, normals, textures } = createSnakeBody(0.3, 1);
@@ -124,9 +125,11 @@ export async function initWebGL() {
         normalBuffer,
         texCoordBuffer,
         vertices,
+        normals,
         textures,
         verticesHead, 
         normalsHead, 
-        texturesHead
+        texturesHead,
+        textureLengthsHead
     };
 }

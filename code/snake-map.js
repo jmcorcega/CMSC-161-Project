@@ -56,11 +56,12 @@ export function loadSnakeTexture(gl, callback, skin) {
 export function drawSnake(gl, positionBuffer, normalBuffer, texCoordBuffer,
     aPosition, aNormal, aTexCoord,
     uViewMatrix, uProjMatrix, uModelMatrix,
-    uUseTexture, uSampler,
+    uColor, uUseTexture, uSampler,
     uLightDirection, uForceLight,
     projMatrix, viewMatrix,
     snake,
-    verticesBody, verticesHead, normalsHead, texturesHead,
+    verticesBody, normalsBody, texturesBody, 
+    verticesHead, normalsHead, texturesHead, textureLengthsHead,
     facingAngle // <- Add facingAngle here
   ) {
     gl.uniformMatrix4fv(uViewMatrix, false, viewMatrix);
@@ -85,18 +86,48 @@ export function drawSnake(gl, positionBuffer, normalBuffer, texCoordBuffer,
 
         if (i === 0) {
             // Head
-            gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verticesHead), gl.STATIC_DRAW);
-            gl.vertexAttribPointer(aPosition, 3, gl.FLOAT, false, 0, 0);
+            let counter = 0;
+            for (const [key, value] of Object.entries(textureLengthsHead)) {
+                console.log (key, value);
+                const length = value;
+                const headVertices = verticesHead.slice(counter * 3, counter * 3 + length * 3);
+                const headNormals = normalsHead.slice(counter * 3, counter * 3 + length * 3);
+                const headTextures = texturesHead.slice(counter * 2, counter * 2 + length * 2);
 
-            gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
-            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normalsHead), gl.STATIC_DRAW);
-            gl.vertexAttribPointer(aNormal, 3, gl.FLOAT, false, 0, 0);
+                if (key != 'head') {
+                    gl.uniform1f(uUseTexture, 0.0);
 
-            gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
-            gl.vertexAttribPointer(aTexCoord, 2, gl.FLOAT, false, 0, 0);
+                    if (key === 'leftEye' || key === 'rightEye') {
+                        gl.uniform3fv(uColor, [1.0, 1.0, 1.0]);
+                    } else { // pupil
+                        gl.uniform3fv(uColor, [0.0, 0.0, 0.0]);
+                    }
+                } else {
+                    gl.uniform1f(uUseTexture, 1.0);
+                    gl.uniform3fv(uColor, [1.0, 1.0, 1.0]);
+                }
 
-            gl.drawArrays(gl.TRIANGLES, 0, verticesHead.length / 3);
+                gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(headVertices), gl.STATIC_DRAW);
+                gl.vertexAttribPointer(aPosition, 3, gl.FLOAT, false, 0, 0);
+
+                gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(headNormals), gl.STATIC_DRAW);
+                gl.vertexAttribPointer(aNormal, 3, gl.FLOAT, false, 0, 0);
+
+                gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
+                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(headTextures), gl.STATIC_DRAW);
+                gl.vertexAttribPointer(aTexCoord, 2, gl.FLOAT, false, 0, 0);
+
+                // Draw the head
+                gl.drawArrays(gl.TRIANGLES, 0, headVertices.length / 3);
+
+                // adjust the counter for the next part of the head
+                counter += length;
+            }
+            // Reset the buffer bindings
+            gl.bindBuffer(gl.ARRAY_BUFFER, null);
+            gl.uniform1f(uUseTexture, 1.0);
         } else {
             // Body
             gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
@@ -104,10 +135,11 @@ export function drawSnake(gl, positionBuffer, normalBuffer, texCoordBuffer,
             gl.vertexAttribPointer(aPosition, 3, gl.FLOAT, false, 0, 0);
 
             gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
-            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normalsHead), gl.STATIC_DRAW);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normalsBody), gl.STATIC_DRAW);
             gl.vertexAttribPointer(aNormal, 3, gl.FLOAT, false, 0, 0);
 
             gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(texturesBody), gl.STATIC_DRAW);
             gl.vertexAttribPointer(aTexCoord, 2, gl.FLOAT, false, 0, 0);
 
             gl.drawArrays(gl.TRIANGLES, 0, verticesBody.length / 3);
