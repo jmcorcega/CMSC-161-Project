@@ -1,0 +1,75 @@
+
+#leaderboards-container {
+    margin-top: 1vh;
+
+    scrollbar-width: auto;
+    scrollbar-color: #7f7f7f #ffffff;
+
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+
+    height: 60vh;
+    overflow-y: scroll;
+
+    background-color: #ffffff;
+    padding: 2rem;
+    width: 30vw;
+    
+    /* Remove existing border properties */
+    border: none;
+    
+    /* 8-bit border effect */
+    box-shadow:
+        /* Outer layer (black) */
+        0 0 0 6px #7f7f7f,
+        /* Inner layer (white) */
+        inset 0 0 0 6px #ffffff,
+        /* Middle layer (gray) */
+        0 0 0 12px #a0a0a0;
+
+    image-rendering: pixelated;
+    position: relative;
+    margin: 8px;
+
+    border-radius: 2px;
+}
+
+.leaderboard-entry {
+    display: flex;
+    flex-direction: row;
+    vertical-align: middle;
+    gap: 2rem;
+}
+
+.leaderboard-entry > .player-position {
+    height: 2rem;
+    width: 2rem;
+    vertical-align: middle;
+    margin: auto;
+    font-size: 1.5rem;
+}
+
+.leaderboard-entry > .player-skin {
+    height: 3.5rem;
+    width: 3.5rem;
+
+    border-radius: 100%;
+}
+
+.leaderboard-entry > .player-info {
+    display: flex;
+    flex-direction: row;
+    flex-grow: 1;
+    vertical-align: middle;
+    margin: auto
+}
+
+.leaderboard-entry .player-name {
+    flex-grow: 1;
+    font-size: 1.5rem;
+}
+
+.leaderboard-entry .player-score {
+    font-size: 1.5rem;
+}

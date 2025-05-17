@@ -16,6 +16,8 @@ import { createTileMap, loadGrassTexture, initGrassBuffers, tileMap,
 
 const dialogController = new DialogController();
 
+import leaderboardService from './leaderboards_service.js';
+
 let isPaused = false;
 let isGameOver = false;
 let isGameFinished = false;
@@ -23,6 +25,7 @@ let isWebGLReady = false;
 let endLevelMessage = "";
 let glContext = null;
 let gameLoopInterval = null;
+let score = 0;
 
 
 // Functions for handling skin selection
@@ -56,6 +59,10 @@ export function getCurrentSkinIdx() {
     }
 }
 
+export function getSkin(id) {
+    return skins.find(s => s.id === id);
+}
+
 
 export function setCurrentSkin(skin) {
     const skinId = skin.id;
@@ -74,11 +81,12 @@ function closePauseMenu() {
 
 
 function onGameOver() {
+    let isInLeaderboard = leaderboardService.isScoreForLeaderboard(score);
     audioService.stopBgm();
     setTimeout(() => {
         isGameOver = true;
         audioService.playSfx("lose");
-        dialogController.setEndLevelMessage(endLevelMessage, "/img/coin_06.png", true, false);
+        dialogController.setEndLevelMessage(endLevelMessage, "/img/coin_06.png", true, isInLeaderboard);
         dialogController.showDialog(3);
     }, 3000);
 }
@@ -97,6 +105,11 @@ function onResumeGame() {
 
 
 function onRestartGame() {
+    let name = document.getElementById('player-name-input');
+    if (isGameOver && name) {
+        leaderboardService.addUser(name.value, score, getCurrentSkin());
+    }
+
     dialogController.closeDialog(2);
     dialogController.closeDialog(3);
     __onExitGame();
@@ -126,6 +139,11 @@ function __onExitGame() {
 
 
 function onExitGame() {
+    let name = document.getElementById('player-name-input');
+    if (isGameOver && name) {
+        leaderboardService.addUser(name.value, score, getCurrentSkin());
+    }
+
     dialogController.closeDialog(2);
     dialogController.closeDialog(3);
     __onExitGame();
@@ -199,7 +217,7 @@ async function startGame() {
     } = await initWebGL();
 
     glContext = gl;
-    const score = document.getElementById('score');
+    const scoreElem = document.getElementById('score');
     const eaten = document.getElementById('eaten');
 
     // Snake with cube segments 
@@ -465,8 +483,9 @@ async function startGame() {
                 eaten.innerHTML = newEaten;
         
                 // Update score
-                let newScore = parseInt(score.innerHTML) + (newEaten * 10);
-                score.innerHTML = newScore;
+                let newScore = score + (newEaten * 10);
+                scoreElem.innerHTML = newScore;
+                score = newScore;
         
                 // Speed up game (min 33ms delay)
                 movementSpeed = Math.max(33, movementSpeed - 5);
@@ -497,6 +516,7 @@ export default class GameScreen extends Screen {
         isGameFinished = false;
         isWebGLReady = false;
         endLevelMessage = "";
+        score = 0;
         
         if (glContext != null) {
             destroyWebGL(glContext);

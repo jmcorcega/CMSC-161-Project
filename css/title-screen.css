@@ -21,11 +21,19 @@
 
 .title-buttons {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
     justify-content: center;
-    gap: 2em;
+    gap: 5rem;
     z-index: 2;
+}
+
+.title-main {
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+    gap: 2rem;
+    align-items: center;
 }
 
 .title-game-name {

@@ -9,6 +9,7 @@
         <link rel="stylesheet" href="css/main.css">
 
         <link rel="stylesheet" href="css/loading-screen.css">
+        <link rel="stylesheet" href="css/leaderboards-screen.css">
         <link rel="stylesheet" href="css/title-screen.css">
         <link rel="stylesheet" href="css/game-screen.css">
         <link rel="stylesheet" href="css/about-screen.css">
@@ -83,7 +84,15 @@
                             <h1 id="dialog-end-game-title">Game Over!</h1>
                             <h1 id="dialog-end-game-subtitle">Subtitle</h1>
                             <img id="dialog-end-game-image" src="img/icons/time.png">
-                            <p id="dialog-end-game-new" class="dialog-content-subtitle">New Record!</p>
+                            <div id="dialog-end-game-new">
+                                <div class="dialog-end-game-new-header">
+                                    <img class="dialog-end-game-new-header-img" src="img/coin_06.png">
+                                    <span class="dialog-end-game-new-header-span font-mini">New Record!</span>
+                                </div>
+                                <div class="name-input-container">
+                                    <input type="text" id="player-name-input" maxlength="12" value="Anonymous" class="pixel-input">
+                                </div>
+                            </div>
                         </div>
                         <div class="dialog-buttons">
                             <div class="dialog-pause-buttons-container">

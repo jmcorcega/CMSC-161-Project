@@ -10,50 +10,54 @@
     <body class="title-screen" id="page-container">
         <div class="title-background"></div>
         <div class="title-buttons">
-            <span class="title-game-name">Snake 3D</span>
-            <div class="title-skin-picker">
-                <h2>Choose your skin!</h2>
-                <div class="title-skin-picker-container">
-                    <div id="title-skin-picker-left" class="title-skin-picker-arrow">
-                        <img src="img/buttons/back.svg" class="title-skin-picker-arrow-image">
+            <div class="title-main">
+                <span class="title-game-name">Snake 3D</span>
+                <div class="title-skin-picker">
+                    <h2>Choose your skin!</h2>
+                    <div class="title-skin-picker-container">
+                        <div id="title-skin-picker-left" class="title-skin-picker-arrow">
+                            <img src="img/buttons/back.svg" class="title-skin-picker-arrow-image">
+                        </div>
+        
+                        <div class="title-skin-picker-item" id="title-skin-picker-item-left">
+                            <img src="img/skins/skin-1.png" id="title-skin-picker-item-left-img" class="title-skin-picker-image">
+                        </div>
+                        <div class="title-skin-picker-item" id="title-skin-picker-item-middle">
+                            <img src="img/skins/skin-2.png" id="title-skin-picker-item-middle-img" class="title-skin-picker-image">
+                        </div>
+                        <div class="title-skin-picker-item" id="title-skin-picker-item-right">
+                            <img src="img/skins/skin-3.png" id="title-skin-picker-item-right-img" class="title-skin-picker-image">
+                        </div>
+        
+                        <div id="title-skin-picker-right" class="title-skin-picker-arrow">
+                            <img src="img/buttons/next.svg" class="title-skin-picker-arrow-image">
+                        </div>
                     </div>
-    
-                    <div class="title-skin-picker-item" id="title-skin-picker-item-left">
-                        <img src="img/skins/skin-1.png" id="title-skin-picker-item-left-img" class="title-skin-picker-image">
-                    </div>
-                    <div class="title-skin-picker-item" id="title-skin-picker-item-middle">
-                        <img src="img/skins/skin-2.png" id="title-skin-picker-item-middle-img" class="title-skin-picker-image">
-                    </div>
-                    <div class="title-skin-picker-item" id="title-skin-picker-item-right">
-                        <img src="img/skins/skin-3.png" id="title-skin-picker-item-right-img" class="title-skin-picker-image">
-                    </div>
-    
-                    <div id="title-skin-picker-right" class="title-skin-picker-arrow">
-                        <img src="img/buttons/next.svg" class="title-skin-picker-arrow-image">
-                    </div>
+                    <span id="title-skin-picker-name">Skin Name</span>
                 </div>
-                <span id="title-skin-picker-name">Skin Name</span>
+                <div class="title-game-buttons">
+                    <button id="title-btn-play">Play!</button>
+                </div>
             </div>
-
-            <div class="title-game-buttons">
-                <button id="title-btn-play">Play!</button>
-                <div class="game-buttons-horizontal">
-                    <button class="game-button-yellow game-button" id="title-btn-music">
-                        <img src="img/icons/musicOn.png">
+            <div class="title-secondary">
+                <div class="title-game-buttons">
+                    <button class="game-button-green game-button" id="title-btn-leaderboards">
+                        <img src="img/icons/leaderboardsComplex.png">
+                        Leaderboards
                     </button>
-                    <button class="game-button-yellow game-button" id="title-btn-sound">
-                        <img src="img/icons/audioOn.png">
+                    <div class="game-buttons-horizontal">
+                        <button class="game-button-yellow game-button" id="title-btn-music">
+                            <img src="img/icons/musicOn.png">
+                        </button>
+                        <button class="game-button-yellow game-button" id="title-btn-sound">
+                            <img src="img/icons/audioOn.png">
+                        </button>
+                    </div>
+                    <button class="game-button-yellow game-button" id="title-btn-about">
+                        <img src="img/icons/information.png">
+                        About
                     </button>
                 </div>
-                <!-- <button class="game-button-green game-button" id="title-btn-leaderboards">
-                    <img src="img/icons/leaderboardsComplex.png">
-                    Leaderboards
-                </button> -->
-                <button class="game-button-yellow game-button" id="title-btn-about">
-                    <img src="img/icons/information.png">
-                    About
-                </button>
             </div>
-        </div>
     </body>
 </html>
