@@ -263,9 +263,9 @@ async function startGame() {
     }, frameRate);
 
     createTileMap();
+    placeEnvironmentObjects();
     placeFoods(5);  // place 5 initial foods in the map
     placeTrees();
-    placeEnvironmentObjects();
     
     // Collecting all rocks from the tileMap
     const rocks = Object.values(tileMap).filter(tile => tile.object === "rock");
@@ -382,7 +382,7 @@ async function startGame() {
         gl.useProgram(shaderProgram);
     
         // Smoothly interpolate cameraAngle toward targetAngle
-        const turnSpeed = 0.05;
+        const turnSpeed = 0.15;
         const angleDiff = targetAngle - cameraAngle;
         cameraAngle += angleDiff * turnSpeed;
     
@@ -487,8 +487,9 @@ async function startGame() {
                 scoreElem.innerHTML = newScore;
                 score = newScore;
         
-                // Speed up game (min 33ms delay)
-                movementSpeed = Math.max(33, movementSpeed - 5);
+                // Speed up game (min 60ms delay)
+                movementSpeed = Math.max(60, movementSpeed - 3);
+
             }
         }
         

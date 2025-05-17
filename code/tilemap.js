@@ -649,35 +649,36 @@ export function placeFoods(count) {
         const index = Math.floor(Math.random() * keys.length);  // Randomly pick a tile key
         const key = keys.splice(index, 1)[0];
         const tile = tileMap[key];
-        const minMaxX = 25; //  boundary for x value of food
-        const minMaxZ = 25; //  boundary for z value of food
+        const minMaxX = gridSize - 5; //  boundary for x value of food
+        const minMaxZ = gridSize - 5; //  boundary for z value of food
 
         // Skip tiles that are on the edge or already occupied
-        if (!(
+        if (
             tile.x < -minMaxX || tile.x > minMaxX ||
             tile.z < -minMaxZ || tile.z > minMaxX ||
             tile.occupied
-        )) {
-            const { vertices, normals, indices } = createApple();
+        ) continue;
+        
+        const { vertices, normals, indices } = createApple();
 
-            // Define possible sizes
-            const sizes = [0.6, 1.0, 1.2]; // Small, Medium, Large
-            const scale = 0.3;
+        // Define possible sizes
+        const sizes = [0.6, 1.0, 1.2]; // Small, Medium, Large
+        const scale = 0.3;
 
-            tile.occupied = true;
-            tile.object = 'food';
+        tile.occupied = true;
+        tile.object = 'food';
 
-            foods.push({
-                color: colors[Math.floor(Math.random() * 3)], // Ensures the index is always within the range 0–2
-                x: tile.x,
-                z: tile.z,
-                vertices,
-                normals,
-                indices,
-                scale,
-            });
-            placed++;
-        }
+        foods.push({
+            color: colors[Math.floor(Math.random() * 3)], // Ensures the index is always within the range 0–2
+            x: tile.x,
+            z: tile.z,
+            vertices,
+            normals,
+            indices,
+            scale,
+        });
+        placed++;
+        
     }
 }
 
