@@ -19,6 +19,18 @@
     animation: slide 40s linear infinite;
 }
 
+/* Same as .title-background but blurred */
+.title-sub-background {
+    position: absolute;
+    background: url("../img/backgrounds/backgroundColorGrass.png") repeat-x;
+    height: 100%;
+    width: 5000px;
+    background-size: contain;
+    filter: blur(10px);
+    opacity: 0.3;
+    animation: slide 40s linear infinite;
+}
+
 .title-game-logo {
     display: flex;
     justify-content: center;
