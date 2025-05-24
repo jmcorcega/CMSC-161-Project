@@ -39,10 +39,8 @@
 }
 
 .about-game-logo img {
-    height: 22vh;
+    height: 12rem;
     width: auto;
-    margin-top: 19.75vh;
-    margin-bottom: 2vh;
 }
 
 .about-container {
@@ -55,7 +53,7 @@
 
 .about-title {
     font-size: 1.5rem;
-    margin-bottom: 12vh;
+    margin: 0;
 }
 
 .about-bottom-title {
@@ -65,3 +63,49 @@
     font-size: 0.75rem;
 }
 /* About Screen */
+
+.about-developers {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    margin-top: 2vh;
+    gap: 1vh;
+}
+
+.about-developers-title {
+    font-family: 'Kenney Mini Square';
+    font-size: 1.25rem;
+    margin-bottom: 1vh;
+}
+
+.about-developer {
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+}
+
+.about-developer > img {
+    height: 4rem;
+    width: 4rem;
+    border-radius: 100%;
+    margin: auto;
+}
+
+.about-developer-name-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem !important;
+}
+
+.about-developer-name {
+    font-size: 1.25rem;
+    margin: 0;
+    text-align: start;
+}
+
+.about-developer-role {
+    font-size: 1rem;
+    color: #166e93;
+    margin: 0;
+    text-align: start;
+}
