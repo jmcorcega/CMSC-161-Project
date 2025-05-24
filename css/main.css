@@ -2,7 +2,7 @@
 body {
     width: 100%;
     height: 100vh;
-    background-color: #121212;
+    background-color: #e7e3ff;
     cursor: url('../img/cursor/normal.png'), auto;	
     display: flex;
     justify-content: center;

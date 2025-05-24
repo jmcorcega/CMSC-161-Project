@@ -21,25 +21,24 @@
 
 #start-game > div > .loading-game-logo img {
     margin: auto;
+    width: 80%;
 }
 
 .start-game-text {
-    padding-top: 8vh;
     width: 100%;
     text-align: center;
-    color: #ffffff;
+    color: #121212;
 }
 
 .start-game-text-header {
-    color: #3798C0;
-    font-size: 1.5rem;
+    font-family: 'Kenney Mini Square';
+    color: #f63a3d;
+    font-size: 2rem;
     padding-bottom: 8vh;
-    
-    text-shadow: 0 0 5px #3798C0, 0 0 10px #3798C0, 0 0 15px #3798C0, 0 0 20px #3798C0, 0 0 25px #3798C0;
 }
 
 .start-game-text-final {
     padding-top: 4vh;
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(0, 0, 0, 0.5);
 }
 /* Start Page */
