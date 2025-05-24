@@ -71,6 +71,9 @@ export function setCurrentSkin(skin) {
 
 
 function showPauseMenu() {
+    if (isGameOver) {
+        return;
+    }
     dialogController.showDialog(2);
 }
 
