@@ -5,6 +5,8 @@ import {
     audioService,
 } from '../lib/classes.js';
 
+import { skins } from "./game.js";
+
 const titleScreen = new TitleScreen();
 
 function preloadBgMusic() {
@@ -59,6 +61,10 @@ function onStartGame() {
     preloadImg('img/icons/audioOn.png');
     preloadImg('img/icons/audioOff.png');
     preloadImg('img/backgrounds/backgroundColorGrass.png');
+    
+    for (let skin of skins) {
+        preloadImg(skin.img);
+    }
 
     titleScreen.loadScreen();
 }

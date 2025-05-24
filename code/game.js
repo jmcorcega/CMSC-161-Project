@@ -504,6 +504,12 @@ async function startGame() {
     render();
 }
 
+// Preload images and icons in memory.
+function preloadImg(url) {
+    var img = new Image();
+    img.src = url;
+}
+
 export default class GameScreen extends Screen {
     constructor() {
         super("pages/snake-game.html");
@@ -530,6 +536,12 @@ export default class GameScreen extends Screen {
 
     onLoading() {
         audioService.preloadBgm("bgm/game.mp3");
+        preloadImg('/img/grass.png');
+        preloadImg('/img/grass-1.jpg');
+        preloadImg('/img/grass-1.png');
+        preloadImg('/img/tileRed_06.png');
+        preloadImg('/img/coin_06.png');
+        preloadImg('/img/log.png');
     }
 
     onShow() {
