@@ -357,7 +357,9 @@ button:active {
     display: flex;
     align-items: center;
     margin-top: 2vh;
+    gap: 1.5rem;
 }
+
 #dialog-btn-music, #dialog-btn-sound {
     display: inline-block;
     margin: auto;
