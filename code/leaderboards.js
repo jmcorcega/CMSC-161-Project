@@ -54,6 +54,7 @@ function generateLeaderboard() {
 export default class LeaderboardScreen extends Screen {
     constructor() {
         super("pages/leaderboards.html");
+        this.title = "Leaderboards";
     }
 
     onShow() {

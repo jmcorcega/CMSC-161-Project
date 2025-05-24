@@ -1,4 +1,4 @@
-import { loadPage } from "../lib/page_helper.js";
+import { loadPage, setPageTitle } from "../lib/page_helper.js";
 
 export default class Screen {
     constructor(template) {
@@ -7,6 +7,7 @@ export default class Screen {
         }
 
         this.template = template;
+        this.title = "Snake 3D";
     }
 
     onHeaderLoad(fn) {
@@ -37,6 +38,7 @@ export default class Screen {
             });
         }, 1000);
     
+        setPageTitle(this.title);
         this.onLoading();
         
         let progress = 0;

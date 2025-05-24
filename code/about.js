@@ -15,6 +15,7 @@ function goToTitleScreen() {
 export default class AboutScreen extends Screen {
     constructor() {
         super("pages/about-screen.html");
+        this.title = "About";
     }
 
     onShow() {
